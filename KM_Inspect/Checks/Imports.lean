@@ -1,0 +1,44 @@
+/-
+Copyright (c) 2025 Eric Hearn. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Hearn
+-/
+import KM_Inspect.Types
+import KM_Inspect.Config
+import KM_Inspect.Environment
+
+/-!
+# Import Discipline Check (Environment-Based)
+
+Verify imports follow the strict Kim Morrison Standard using environment introspection.
+
+Instead of parsing text for `public import`/`module` keywords, we verify the
+**actual effect** by checking what declarations are visible in the loaded environment.
+
+**MainTheorem.lean**:
+- Can ONLY import Mathlib, Init, Lean, Batteries (verified via env.header.imports)
+
+**ProofOfMainTheorem.lean**:
+- Only StatementOfTheorem and mainTheorem should be exported
+- All internal helpers must be private (verified via re-import test)
+-/
+
+namespace KM_Inspect.Checks
+
+open Lean
+
+/-- Check imports using environment introspection.
+    This performs the "re-import test" - verifying what's actually visible
+    rather than checking for syntactic markers. -/
+def checkImports (resolved : ResolvedConfig) : MetaM CheckResult := do
+  let env ← getEnv
+
+  -- Verify module visibility using the re-import test
+  let visibilityResult := checkModuleVisibility env
+    resolved.projectPrefix
+    resolved.statementName
+    resolved.theoremName
+
+  return visibilityResult
+
+end KM_Inspect.Checks
