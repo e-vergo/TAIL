@@ -98,9 +98,16 @@ def filterUserDeclarations (env : Environment) (names : List Name) : List Name :
     | some (.defnInfo _) | some (.thmInfo _) => true
     | _ => false
 
+/-- Check if a module is a "core" module (MainTheorem or ProofOfMainTheorem) -/
+def isCoreModule (moduleName : Name) (projectPrefix : String) : Bool :=
+  let mainMod := s!"{projectPrefix}.MainTheorem".toName
+  let proofMod := s!"{projectPrefix}.ProofOfMainTheorem".toName
+  moduleName == mainMod || moduleName == proofMod
+
 /-- The re-import test: verify only allowed declarations are exported from the proof module.
     When ProofOfMainTheorem is imported, only StatementOfTheorem and mainTheorem should be
-    visible - all internal helpers should be private. -/
+    visible from the core modules. Declarations from privately-imported helper modules
+    are allowed (they won't be re-exported). -/
 def checkModuleVisibility (env : Environment) (projectPrefix : String)
     (statementName theoremName : Name) : CheckResult := Id.run do
   -- Get all project declarations in the loaded environment
@@ -109,16 +116,23 @@ def checkModuleVisibility (env : Environment) (projectPrefix : String)
   -- Filter to user-defined declarations (defs and theorems)
   let userDecls := filterUserDeclarations env projectDecls
 
-  -- The only allowed exports are:
+  -- The only allowed exports FROM CORE MODULES are:
   -- 1. StatementOfTheorem (def in MainTheorem.lean)
   -- 2. mainTheorem (theorem in ProofOfMainTheorem.lean)
   let allowed := [statementName, theoremName]
 
-  let violations := userDecls.filter (fun d => !allowed.contains d)
+  -- Only flag violations from core modules (MainTheorem, ProofOfMainTheorem)
+  -- Declarations from privately-imported helper modules are OK
+  let violations := userDecls.filter fun d =>
+    if allowed.contains d then false
+    else
+      match getModuleName env d with
+      | some modName => isCoreModule modName projectPrefix
+      | none => false
 
   if violations.isEmpty then
     CheckResult.pass "Module Visibility"
-      s!"Only {statementName.toString.splitOn "." |>.getLast!} and {theoremName.toString.splitOn "." |>.getLast!} are exported"
+      s!"Only {statementName.toString.splitOn "." |>.getLast!} and {theoremName.toString.splitOn "." |>.getLast!} are exported from core modules"
   else
     let details := violations.map fun v =>
       let modName := match getModuleName env v with
@@ -126,7 +140,7 @@ def checkModuleVisibility (env : Environment) (projectPrefix : String)
         | none => "unknown"
       s!"Leaked: {v} (from {modName})"
     CheckResult.fail "Module Visibility"
-      s!"{violations.length} internal declarations leaked through imports"
+      s!"{violations.length} internal declarations leaked from core modules"
       details
 
 end KM_Inspect

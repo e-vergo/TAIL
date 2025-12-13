@@ -107,41 +107,44 @@ def extractProjectPrefix (projectRoot : System.FilePath) : IO (Except String Str
 
 /-! ## Resolution -/
 
+/-- Resolve configuration with an explicit project prefix. -/
+def resolveWithPrefix (projectRoot : System.FilePath) (projectPrefix : String) : IO (Except String ResolvedConfig) := do
+  -- Source directory uses project prefix as name (standard convention)
+  let sourcePath := projectRoot / projectPrefix
+
+  -- Verify source directory exists
+  let sourceExists ← sourcePath.pathExists
+  if !sourceExists then
+    return .error s!"Source directory not found: {sourcePath}"
+
+  -- Resolve paths using hardcoded names
+  let mainTheoremPath := sourcePath / kmMainTheoremFile
+  let proofOfMainTheoremPath := sourcePath / kmProofOfMainTheoremFile
+
+  -- Verify required files exist
+  let mainExists ← mainTheoremPath.pathExists
+  if !mainExists then
+    return .error s!"{kmMainTheoremFile} not found: {mainTheoremPath}"
+
+  let proofExists ← proofOfMainTheoremPath.pathExists
+  if !proofExists then
+    return .error s!"{kmProofOfMainTheoremFile} not found: {proofOfMainTheoremPath}"
+
+  return .ok {
+    projectPrefix
+    projectRoot
+    sourcePath
+    mainTheoremPath
+    proofOfMainTheoremPath
+  }
+
 /-- Resolve configuration from a directory path.
     Auto-detects project prefix from lakefile and uses hardcoded standard names. -/
 def resolveFromDirectory (projectRoot : System.FilePath) : IO (Except String ResolvedConfig) := do
   -- Extract project prefix from lakefile
   match ← extractProjectPrefix projectRoot with
   | .error e => return .error e
-  | .ok projectPrefix =>
-    -- Source directory uses project prefix as name (standard convention)
-    let sourcePath := projectRoot / projectPrefix
-
-    -- Verify source directory exists
-    let sourceExists ← sourcePath.pathExists
-    if !sourceExists then
-      return .error s!"Source directory not found: {sourcePath}"
-
-    -- Resolve paths using hardcoded names
-    let mainTheoremPath := sourcePath / kmMainTheoremFile
-    let proofOfMainTheoremPath := sourcePath / kmProofOfMainTheoremFile
-
-    -- Verify required files exist
-    let mainExists ← mainTheoremPath.pathExists
-    if !mainExists then
-      return .error s!"{kmMainTheoremFile} not found: {mainTheoremPath}"
-
-    let proofExists ← proofOfMainTheoremPath.pathExists
-    if !proofExists then
-      return .error s!"{kmProofOfMainTheoremFile} not found: {proofOfMainTheoremPath}"
-
-    return .ok {
-      projectPrefix
-      projectRoot
-      sourcePath
-      mainTheoremPath
-      proofOfMainTheoremPath
-    }
+  | .ok projectPrefix => resolveWithPrefix projectRoot projectPrefix
 
 /-! ## Trust Level Detection -/
 

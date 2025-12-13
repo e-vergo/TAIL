@@ -98,6 +98,8 @@ structure CLIArgs where
   projectRoot : System.FilePath := "."
   format : OutputFormat := .text
   outputPath : Option System.FilePath := none
+  generateReport : Bool := false  -- Auto-generate compliance report file
+  projectPrefix : Option String := none  -- Override auto-detected prefix
   deriving Repr
 
 /-- Parse command line arguments -/
@@ -112,22 +114,29 @@ def parseArgs (args : List String) : IO CLIArgs := do
       result := { result with format := .json }
     else if arg == "--text" then
       result := { result with format := .text }
+    else if arg == "--report" || arg == "-r" then
+      result := { result with generateReport := true }
     else if arg == "--output" || arg == "-o" then
       i := i + 1
       if i < argsArray.size then
         result := { result with outputPath := some argsArray[i]! }
+    else if arg == "--prefix" || arg == "-p" then
+      i := i + 1
+      if i < argsArray.size then
+        result := { result with projectPrefix := some argsArray[i]! }
     else if arg == "--help" || arg == "-h" then
-      IO.println "Usage: lake exe kmverify [directory] [--json] [--output FILE]"
+      IO.println "Usage: lake exe kmverify [directory] [--prefix NAME] [--report] [--output FILE]"
       IO.println ""
       IO.println "Verify a Lean project follows the Kim Morrison Standard."
       IO.println ""
       IO.println "Arguments:"
       IO.println "  directory    Project root (default: current directory)"
-      IO.println "               Project prefix is auto-detected from lakefile.lean"
       IO.println ""
       IO.println "Options:"
+      IO.println "  -p, --prefix Override project prefix (default: auto-detect from lakefile)"
       IO.println "  --json       Output in JSON format"
       IO.println "  --text       Output in text format (default)"
+      IO.println "  -r, --report Generate km_compliance_report.txt in project root"
       IO.println "  -o, --output Write output to FILE"
       IO.println "  -h, --help   Show this help"
       IO.Process.exit 0
@@ -141,8 +150,10 @@ def parseArgs (args : List String) : IO CLIArgs := do
 def main (args : List String) : IO UInt32 := do
   let cliArgs ← parseArgs args
 
-  -- Resolve configuration from directory (auto-detects project prefix from lakefile)
-  let configResult ← resolveFromDirectory cliArgs.projectRoot
+  -- Resolve configuration (use explicit prefix if provided, otherwise auto-detect)
+  let configResult ← match cliArgs.projectPrefix with
+    | some pfx => resolveWithPrefix cliArgs.projectRoot pfx
+    | none => resolveFromDirectory cliArgs.projectRoot
 
   match configResult with
   | .error e =>
@@ -164,7 +175,14 @@ def main (args : List String) : IO UInt32 := do
         (s := { env })
         (Lean.Meta.MetaM.run' (runVerification resolved))
 
+      -- Print to console
       printReport report cliArgs.format cliArgs.outputPath
+
+      -- Generate compliance report file if requested
+      if cliArgs.generateReport then
+        let reportPath := cliArgs.projectRoot / "km_compliance_report.txt"
+        printReport report .text (some reportPath)
+        IO.println s!"Compliance report written to: {reportPath}"
 
       return if report.allPassed then (0 : UInt32) else (1 : UInt32)
     catch e =>

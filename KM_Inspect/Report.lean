@@ -44,11 +44,17 @@ private def formatNumber (n : Nat) : String :=
 
 /-! ## Human-Readable Output -/
 
+/-- Get current timestamp -/
+private def getTimestamp : IO String := do
+  let output ← IO.Process.output { cmd := "date", args := #["+%Y-%m-%d %H:%M:%S"] }
+  return output.stdout.trim
+
 /-- Format the header -/
 def formatHeader (projectName : String) : String :=
   s!"{divider}\n" ++
-  s!"KIM MORRISON STANDARD VERIFICATION\n" ++
+  s!"KIM MORRISON STANDARD COMPLIANCE REPORT\n" ++
   s!"Project: {projectName}\n" ++
+  s!"Tool: KM_Inspect v{kmVerifyVersion}\n" ++
   s!"{divider}\n"
 
 /-- Format trust tier summary (strict Kim Morrison standard - only 2 tiers) -/
@@ -92,22 +98,42 @@ def formatChecks (checks : List CheckResult) : String :=
   let body := String.intercalate "" (checks.map formatCheck)
   header ++ body
 
+/-- Format Kim Morrison Standard explanation -/
+def formatStandardExplanation : String :=
+  "\nKIM MORRISON STANDARD REQUIREMENTS\n" ++ thinDivider ++ "\n" ++
+  "The Kim Morrison Standard ensures AI-generated proofs are trustworthy by:\n\n" ++
+  "  1. MainTheorem.lean\n" ++
+  "     - Contains ONLY Mathlib imports (no project code)\n" ++
+  "     - Defines: def StatementOfTheorem : Prop := ...\n" ++
+  "     - Human reviewer can verify the claim without trusting AI\n\n" ++
+  "  2. ProofOfMainTheorem.lean\n" ++
+  "     - Uses Lean 4 module system\n" ++
+  "     - Public import: MainTheorem (re-exported)\n" ++
+  "     - Private imports: supporting lemmas (hidden)\n" ++
+  "     - Contains: theorem mainTheorem : StatementOfTheorem\n\n" ++
+  "  Result: `import ProofOfMainTheorem` exposes exactly TWO declarations:\n" ++
+  "          - StatementOfTheorem (the claim)\n" ++
+  "          - mainTheorem (the proof)\n"
+
 /-- Format the final result -/
 def formatResult (allPassed : Bool) : String :=
   let result := if allPassed then
     "\n" ++ divider ++ "\n" ++
     "RESULT: PROJECT VERIFIED\n" ++
+    "\nThis project meets the Kim Morrison Standard for AI-assisted formal proofs.\n" ++
+    "A human reviewer only needs to verify MainTheorem.lean to trust the result.\n" ++
     divider ++ "\n"
   else
     "\n" ++ divider ++ "\n" ++
     "RESULT: VERIFICATION FAILED\n" ++
-    "Please fix the issues above before requesting review.\n" ++
+    "\nPlease fix the issues above before requesting review.\n" ++
     divider ++ "\n"
   result
 
 /-- Format a complete verification report -/
 def formatReport (report : VerificationReport) : String :=
   formatHeader report.projectName ++
+  formatStandardExplanation ++
   formatTierSummary report.stats ++
   formatChecks report.checks ++
   formatResult report.allPassed

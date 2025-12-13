@@ -6,7 +6,8 @@ package KM_Inspect where
   keywords := #["verification", "formal-methods", "lean4"]
   leanOptions := #[
     ⟨`pp.unicode.fun, true⟩,
-    ⟨`relaxedAutoImplicit, false⟩
+    ⟨`relaxedAutoImplicit, false⟩,
+    ⟨`experimental.module, true⟩  -- Enable module system for Kim Morrison Standard
   ]
 
 require mathlib from git
@@ -28,3 +29,7 @@ lean_exe kmverify where
 lean_exe kmscaffold where
   root := `KM_Inspect.Scaffold
   supportInterpreter := true
+
+-- Example project demonstrating Kim Morrison Standard compliance
+lean_lib Example where
+  globs := #[.submodules `Example]
