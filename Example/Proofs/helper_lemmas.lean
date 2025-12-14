@@ -5,7 +5,6 @@ import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Tactic
 
-namespace helper_lemmas
 
 open Finset
 
@@ -56,5 +55,3 @@ lemma sum_cubes_eq (n : ℕ) :
   | succ n ih =>
     rw [sum_range_succ, ih]
     exact sum_cubes_step n
-
-end helper_lemmas
