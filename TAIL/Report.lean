@@ -102,13 +102,13 @@ def formatChecks (checks : List CheckResult) : String :=
 def formatResult (allPassed : Bool) : String :=
   let result := if allPassed then
     "\n" ++ divider ++ "\n" ++
-    "RESULT: PROJECT VERIFIED\n" ++
+    "RESULT: PROJECT MEETS TEMPLATE EXPECTATIONS\n" ++
     "\nThis project meets the Kim Morrison Standard for AI-assisted formal proofs.\n" ++
     "A human reviewer only needs to verify MainTheorem.lean to trust the result.\n" ++
     divider ++ "\n"
   else
     "\n" ++ divider ++ "\n" ++
-    "RESULT: VERIFICATION FAILED\n" ++
+    "RESULT: PROJECT FAILS TO MEET TEMPLATE EXPECTATIONS\n" ++
     "\nPlease fix the issues above before requesting review.\n" ++
     divider ++ "\n"
   result

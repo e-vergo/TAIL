@@ -1,48 +1,29 @@
 ================================================================================
 KIM MORRISON STANDARD COMPLIANCE REPORT
 Project: Example
-Tool: TAIL v1.0.0
+Tool: TAIL v0.1
 ================================================================================
-
-KIM MORRISON STANDARD REQUIREMENTS
---------------------------------------------------------------------------------
-The Kim Morrison Standard ensures AI-generated proofs are trustworthy by:
-
-  1. MainTheorem.lean
-     - Contains ONLY Mathlib imports (no project code)
-     - Defines: def StatementOfTheorem : Prop := ...
-     - Human reviewer can verify the claim without trusting AI
-
-  2. ProofOfMainTheorem.lean
-     - Uses Lean 4 module system
-     - Public import: MainTheorem (re-exported)
-     - Private imports: supporting lemmas (hidden)
-     - Contains: theorem mainTheorem : StatementOfTheorem
-
-  Result: `import ProofOfMainTheorem` exposes exactly TWO declarations:
-          - StatementOfTheorem (the claim)
-          - mainTheorem (the proof)
 
 TRUST TIER SUMMARY (STRICT KIM MORRISON STANDARD)
 --------------------------------------------------------------------------------
-  MainTheorem.lean                        34 lines  [HUMAN REVIEW]
-  ProofOfMainTheorem.lean                 27 lines  [MACHINE VERIFIED]
+  MainTheorem.lean                        15 lines  [HUMAN REVIEW]
+  ProofOfMainTheorem.lean                 12 lines  [MACHINE VERIFIED]
 --------------------------------------------------------------------------------
-  REVIEW BURDEN: 34 lines (MainTheorem.lean only)
-  TOTAL: 61 lines (55% requires review)
+  REVIEW BURDEN: 15 lines (MainTheorem.lean only)
+  TOTAL: 27 lines (55% requires review)
 
 CHECKS
 --------------------------------------------------------------------------------
   [PASS] Structure
-  [PASS] Soundness
+  [FAIL] Soundness
+         Custom axiom: _private.Example.Proofs.helper_lemmas.0.sum_range_eq
   [PASS] Proof Minimality
   [PASS] MainTheorem Purity
   [PASS] Module Visibility
   [PASS] Lean4Checker
 
 ================================================================================
-RESULT: PROJECT VERIFIED
+RESULT: PROJECT FAILS TO MEET TEMPLATE EXPECTATIONS
 
-This project meets the Kim Morrison Standard for AI-assisted formal proofs.
-A human reviewer only needs to verify MainTheorem.lean to trust the result.
+Please fix the issues above before requesting review.
 ================================================================================

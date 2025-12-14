@@ -147,10 +147,11 @@ def checkSoundness (resolved : ResolvedConfig) : MetaM CheckResult := do
   let mut nativeDecideUsages : List Name := []
   let mut trivialTheorems : List Name := []
 
-  -- Check ALL project declarations
+  -- Check ALL project declarations (including module-private ones)
+  let privatePrefix := s!"_private.{projectPrefix}"
   for (name, info) in env.constants.toList do
     let nameStr := name.toString
-    if !nameStr.startsWith projectPrefix then
+    if !(nameStr.startsWith projectPrefix || nameStr.startsWith privatePrefix) then
       continue
 
     match info with

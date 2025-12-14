@@ -75,19 +75,28 @@ def getDeclKind (info : ConstantInfo) : String :=
 
 /-! ## Re-Import Test (Module Visibility Checking) -/
 
-/-- Get all project declarations visible in the environment.
-    These are declarations from modules starting with the project prefix. -/
+/-- Check if a module name belongs to the project (starts with project prefix) -/
+def isProjectModule (moduleName : Name) (projectPrefix : String) : Bool :=
+  moduleName.toString.startsWith projectPrefix
+
+/-- Get all visible declarations that come from project modules.
+    Checks module membership rather than name prefix, since declarations
+    may be in the global namespace (e.g., StatementOfTheorem, mainTheorem). -/
 def getVisibleProjectDeclarations (env : Environment) (projectPrefix : String) : List Name := Id.run do
   let mut visible : List Name := []
-  let prefix_ := projectPrefix ++ "."
 
   for (name, _) in env.constants.toList do
-    let nameStr := name.toString
-    -- Only look at project declarations
-    if !nameStr.startsWith prefix_ then continue
     -- Skip internal names
     if isInternalName name then continue
-    visible := name :: visible
+    -- Skip names starting with _private (module-private declarations)
+    if name.toString.startsWith "_private" then continue
+
+    -- Check if this declaration comes from a project module
+    match getModuleName env name with
+    | some modName =>
+      if isProjectModule modName projectPrefix then
+        visible := name :: visible
+    | none => continue
 
   return visible.reverse
 
@@ -106,33 +115,26 @@ def isCoreModule (moduleName : Name) (projectPrefix : String) : Bool :=
 
 /-- The re-import test: verify only allowed declarations are exported from the proof module.
     When ProofOfMainTheorem is imported, only StatementOfTheorem and mainTheorem should be
-    visible from the core modules. Declarations from privately-imported helper modules
-    are allowed (they won't be re-exported). -/
+    visible from project modules. Helper declarations must be private (using module system). -/
 def checkModuleVisibility (env : Environment) (projectPrefix : String)
     (statementName theoremName : Name) : CheckResult := Id.run do
-  -- Get all project declarations in the loaded environment
+  -- Get all declarations from project modules in the loaded environment
   let projectDecls := getVisibleProjectDeclarations env projectPrefix
 
   -- Filter to user-defined declarations (defs and theorems)
   let userDecls := filterUserDeclarations env projectDecls
 
-  -- The only allowed exports FROM CORE MODULES are:
+  -- The only allowed exports are:
   -- 1. StatementOfTheorem (def in MainTheorem.lean)
   -- 2. mainTheorem (theorem in ProofOfMainTheorem.lean)
   let allowed := [statementName, theoremName]
 
-  -- Only flag violations from core modules (MainTheorem, ProofOfMainTheorem)
-  -- Declarations from privately-imported helper modules are OK
-  let violations := userDecls.filter fun d =>
-    if allowed.contains d then false
-    else
-      match getModuleName env d with
-      | some modName => isCoreModule modName projectPrefix
-      | none => false
+  -- Any project declaration that's not in the allowed list is a violation
+  let violations := userDecls.filter fun d => !allowed.contains d
 
   if violations.isEmpty then
     CheckResult.pass "Module Visibility"
-      s!"Only {statementName.toString.splitOn "." |>.getLast!} and {theoremName.toString.splitOn "." |>.getLast!} are exported from core modules"
+      s!"Only {statementName.toString.splitOn "." |>.getLast!} and {theoremName.toString.splitOn "." |>.getLast!} are exported from project modules"
   else
     let details := violations.map fun v =>
       let modName := match getModuleName env v with
@@ -140,7 +142,7 @@ def checkModuleVisibility (env : Environment) (projectPrefix : String)
         | none => "unknown"
       s!"Leaked: {v} (from {modName})"
     CheckResult.fail "Module Visibility"
-      s!"{violations.length} internal declarations leaked from core modules"
+      s!"{violations.length} internal declarations leaked from project modules"
       details
 
 end TAIL
