@@ -5,14 +5,6 @@ import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Tactic
 
-/-!
-# Supporting Lemmas for Nicomachus's Theorem
-
-Internal lemmas for the proof. These are in a public section so ProofOfMainTheorem
-can access them, but they are NOT re-exported because ProofOfMainTheorem imports
-this module privately.
--/
-
 namespace helper_lemmas
 
 open Finset
