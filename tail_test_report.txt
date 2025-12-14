@@ -1,0 +1,51 @@
+======================================================================
+TAIL TEST HARNESS
+======================================================================
+
+── VIOLATION DETECTION TESTS ─────────────────────────────────────────
+These fixtures contain intentional violations that TAIL should detect.
+
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Structure/MissingStatement (Structure)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Structure/WrongStatementType (Structure)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Structure/NonMathlibImport (Structure)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/UseSorry (Soundness)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/UseNativeDecide (Soundness)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/CustomAxiom (Soundness)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/MultipleTheorems (ProofMinimality)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/ExtraDefinition (ProofMinimality)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/ZeroTheorems (ProofMinimality)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/MainTheoremPurity/TheoremInStatement (MainTheoremPurity)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ModuleVisibility/LeakedHelper (ModuleVisibility)
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ModuleVisibility/MissingModuleKeyword (ModuleVisibility)
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ModuleVisibility/WrongImportType (ModuleVisibility)
+    FALSE NEGATIVE: Check passed but should have failed. Message: Only StatementOfTheorem and mainTheorem are exported from project modules
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ModuleVisibility/MissingExpose (ModuleVisibility)
+    FALSE NEGATIVE: Check passed but should have failed. Message: Only StatementOfTheorem and mainTheorem are exported from project modules
+✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ModuleVisibility/HelperNotInModule (ModuleVisibility)
+
+── FALSE POSITIVE PREVENTION TESTS ───────────────────────────────────
+These fixtures are valid and should pass all checks.
+
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Structure/ValidBasic (Structure)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Structure/MultipleMathlibImports (Structure)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Structure/AllowedImports (Structure)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesStandardAxioms (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesDecide (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesClassicalLogic (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesQuotient (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/DeepDependencyChain (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesSimpWithMathlib (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesRflAndTrivial (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/ComplexValidProof (Soundness)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ProofMinimality/ExactlyOneTheorem (ProofMinimality)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ProofMinimality/WithInternalAux (ProofMinimality)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/MainTheoremPurity/OnlyDefs (MainTheoremPurity)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/MainTheoremPurity/MultipleHelperDefs (MainTheoremPurity)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ModuleVisibility/ProperModuleSystem (ModuleVisibility)
+✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ModuleVisibility/PublicReexports (ModuleVisibility)
+
+----------------------------------------------------------------------
+Violation Detection: 13/15 violations correctly detected
+False Positive Prevention: 17/17 valid fixtures correctly passed
+Total: 30/32 tests passed
+======================================================================

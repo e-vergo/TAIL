@@ -102,7 +102,7 @@ partial def containsNativeDecide (e : Expr) : Bool :=
 
 /-- Trivial proof terms that indicate placeholder or meaningless theorems -/
 def trivialProofConstants : List Name :=
-  [`True.intro, `trivial, `rfl]
+  [`True.intro, `trivial]
 
 /-- Check if an expression is a trivial proof (True.intro, trivial, rfl with no meaningful content) -/
 def isTrivialProof (e : Expr) : MetaM Bool := do
@@ -147,11 +147,18 @@ def checkSoundness (resolved : ResolvedConfig) : MetaM CheckResult := do
   let mut nativeDecideUsages : List Name := []
   let mut trivialTheorems : List Name := []
 
+  -- The standard Kim Morrison names (not prefixed) - must always check these
+  let mainTheoremName := resolved.theoremName'
+  let statementName := resolved.statementName'
+
   -- Check ALL project declarations (including module-private ones)
   let privatePrefix := s!"_private.{projectPrefix}"
   for (name, info) in env.constants.toList do
     let nameStr := name.toString
-    if !(nameStr.startsWith projectPrefix || nameStr.startsWith privatePrefix) then
+    -- Check project-prefixed declarations OR the standard Kim Morrison names
+    let isProjectDecl := nameStr.startsWith projectPrefix || nameStr.startsWith privatePrefix
+    let isStandardKMDecl := name == mainTheoremName || name == statementName
+    if !(isProjectDecl || isStandardKMDecl) then
       continue
 
     match info with

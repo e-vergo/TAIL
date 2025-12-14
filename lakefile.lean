@@ -33,3 +33,12 @@ lean_exe tailscaffold where
 -- Example project demonstrating Kim Morrison Standard compliance
 lean_lib Example where
   globs := #[.submodules `Example]
+
+-- Test fixtures for verification checks
+lean_lib TestFixtures where
+  globs := #[.submodules `TestFixtures]
+
+-- Test harness executable
+lean_exe tailtest where
+  root := `TAIL.Test
+  supportInterpreter := true
