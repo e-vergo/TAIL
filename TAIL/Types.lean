@@ -6,12 +6,12 @@ Authors: Eric Hearn
 import Lean
 
 /-!
-# KM_Inspect Types
+# TAIL Types
 
 Core types for Kim Morrison Standard verification.
 -/
 
-namespace KM_Inspect
+namespace TAIL
 
 open Lean
 
@@ -123,4 +123,4 @@ instance : ToJson VerificationReport where
     ("all_passed", toJson r.allPassed)
   ]
 
-end KM_Inspect
+end TAIL

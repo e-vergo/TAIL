@@ -5,13 +5,13 @@ Authors: Eric Hearn
 -/
 
 /-!
-# KM_Inspect File Utilities
+# TAIL File Utilities
 
 Minimal file utilities for line counting statistics.
 All verification logic uses environment introspection, not text parsing.
 -/
 
-namespace KM_Inspect
+namespace TAIL
 
 /-! ## Line Counting -/
 
@@ -23,4 +23,4 @@ def countLines (path : System.FilePath) : IO Nat := do
   catch _ =>
     return 0
 
-end KM_Inspect
+end TAIL

@@ -1,7 +1,7 @@
 ================================================================================
 KIM MORRISON STANDARD COMPLIANCE REPORT
 Project: Example
-Tool: KM_Inspect v1.0.0
+Tool: TAIL v1.0.0
 ================================================================================
 
 KIM MORRISON STANDARD REQUIREMENTS

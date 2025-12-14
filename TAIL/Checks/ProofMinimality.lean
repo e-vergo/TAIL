@@ -3,9 +3,9 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
-import KM_Inspect.Environment
+import TAIL.Types
+import TAIL.Config
+import TAIL.Environment
 
 /-!
 # Proof Minimality Check
@@ -14,7 +14,7 @@ Verify ProofOfMainTheorem.lean contains exactly one theorem (the main theorem).
 Uses environment introspection instead of text-based parsing.
 -/
 
-namespace KM_Inspect.Checks
+namespace TAIL.Checks
 
 open Lean Meta
 
@@ -24,17 +24,17 @@ def checkProofMinimality (resolved : ResolvedConfig) : MetaM CheckResult := do
   let proofModule := resolved.proofOfMainTheoremModule
 
   -- Get all declarations in the ProofOfMainTheorem module
-  let decls := KM_Inspect.getModuleDeclarations env proofModule
+  let decls := TAIL.getModuleDeclarations env proofModule
 
   -- Filter to theorems only (exclude internal/auxiliary)
   let theorems := decls.filter fun name =>
     match env.find? name with
-    | some (.thmInfo _) => !KM_Inspect.isInternalName name
+    | some (.thmInfo _) => !TAIL.isInternalName name
     | _ => false
 
   -- Filter to non-theorem declarations (potential violations)
   let nonTheorems := decls.filter fun name =>
-    if KM_Inspect.isInternalName name then false
+    if TAIL.isInternalName name then false
     else match env.find? name with
       | some (.thmInfo _) => false
       | some (.defnInfo _) => true  -- defs are violations
@@ -51,7 +51,7 @@ def checkProofMinimality (resolved : ResolvedConfig) : MetaM CheckResult := do
     details := details ++ ["No theorem found in ProofOfMainTheorem.lean"]
   else if theorems.length == 1 then
     let thm := theorems.head!
-    let expectedName := resolved.theoremName
+    let expectedName := resolved.theoremName'
     if thm != expectedName then
       details := details ++ [s!"Found theorem '{thm}' (expected '{expectedName}')"]
       -- This is a warning, not a failure
@@ -67,7 +67,7 @@ def checkProofMinimality (resolved : ResolvedConfig) : MetaM CheckResult := do
     details := details ++ [s!"Extra declarations found ({nonTheorems.length}):"]
     for decl in nonTheorems do
       let kind := match env.find? decl with
-        | some info => KM_Inspect.getDeclKind info
+        | some info => TAIL.getDeclKind info
         | none => "unknown"
       details := details ++ [s!"  - {kind} {decl}"]
 
@@ -79,4 +79,4 @@ def checkProofMinimality (resolved : ResolvedConfig) : MetaM CheckResult := do
     return CheckResult.fail "Proof Minimality"
       "ProofOfMainTheorem.lean structure invalid" details
 
-end KM_Inspect.Checks
+end TAIL.Checks

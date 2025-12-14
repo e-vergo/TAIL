@@ -3,22 +3,22 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
+import TAIL.Types
+import TAIL.Config
 
 /-!
-# KM_Inspect Report Formatting
+# TAIL Report Formatting
 
 Human-readable and JSON output formatting.
 -/
 
-namespace KM_Inspect
+namespace TAIL
 
 open Lean
 
 /-! ## Constants -/
 
-def kmVerifyVersion : String := "0.1"
+def tailVersion : String := "0.1"
 
 private def lineWidth : Nat := 80
 private def divider : String := String.ofList (List.replicate lineWidth '=')
@@ -54,7 +54,7 @@ def formatHeader (projectName : String) : String :=
   s!"{divider}\n" ++
   s!"KIM MORRISON STANDARD COMPLIANCE REPORT\n" ++
   s!"Project: {projectName}\n" ++
-  s!"Tool: KM_Inspect v{kmVerifyVersion}\n" ++
+  s!"Tool: TAIL v{tailVersion}\n" ++
   s!"{divider}\n"
 
 /-- Format trust tier summary (strict Kim Morrison standard - only 2 tiers) -/
@@ -137,7 +137,7 @@ def formatReportJson (report : VerificationReport) : String :=
 
   -- Build enhanced JSON structure (strict Kim Morrison standard - 2 tiers)
   let json := Json.mkObj [
-    ("version", toJson kmVerifyVersion),
+    ("version", toJson tailVersion),
     ("standard", toJson "Kim Morrison Strict"),
     ("project", toJson report.projectName),
     ("result", toJson result),
@@ -167,4 +167,4 @@ def printReport (report : VerificationReport) (format : OutputFormat := .text)
   | some path => IO.FS.writeFile path content
   | none => IO.println content
 
-end KM_Inspect
+end TAIL

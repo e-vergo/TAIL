@@ -3,9 +3,9 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
-import KM_Inspect.Environment
+import TAIL.Types
+import TAIL.Config
+import TAIL.Environment
 
 /-!
 # Import Discipline Check (Environment-Based)
@@ -23,7 +23,7 @@ Instead of parsing text for `public import`/`module` keywords, we verify the
 - All internal helpers must be private (verified via re-import test)
 -/
 
-namespace KM_Inspect.Checks
+namespace TAIL.Checks
 
 open Lean
 
@@ -36,9 +36,9 @@ def checkImports (resolved : ResolvedConfig) : MetaM CheckResult := do
   -- Verify module visibility using the re-import test
   let visibilityResult := checkModuleVisibility env
     resolved.projectPrefix
-    resolved.statementName
-    resolved.theoremName
+    resolved.statementName'
+    resolved.theoremName'
 
   return visibilityResult
 
-end KM_Inspect.Checks
+end TAIL.Checks

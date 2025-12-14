@@ -3,8 +3,8 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
+import TAIL.Types
+import TAIL.Config
 
 /-!
 # Lean4Checker Integration
@@ -17,7 +17,7 @@ using metaprogramming to build an inconsistent environment.
 See: https://github.com/leanprover/lean4checker
 -/
 
-namespace KM_Inspect.Checks
+namespace TAIL.Checks
 
 /-- Run lean4checker to verify kernel acceptance of ProofOfMainTheorem module.
 
@@ -47,4 +47,4 @@ def checkLean4Checker (resolved : ResolvedConfig) : IO CheckResult := do
       s!"Kernel verification failed for {moduleName}"
       details
 
-end KM_Inspect.Checks
+end TAIL.Checks

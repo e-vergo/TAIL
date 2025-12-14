@@ -4,16 +4,16 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
 import Lean
-import KM_Inspect.Types
+import TAIL.Types
 
 /-!
-# KM_Inspect Environment Utilities
+# TAIL Environment Utilities
 
 Environment introspection utilities for verification.
 All checks use proper Lean environment queries, not text parsing.
 -/
 
-namespace KM_Inspect
+namespace TAIL
 
 open Lean Meta
 
@@ -143,4 +143,4 @@ def checkModuleVisibility (env : Environment) (projectPrefix : String)
       s!"{violations.length} internal declarations leaked from core modules"
       details
 
-end KM_Inspect
+end TAIL

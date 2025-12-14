@@ -5,14 +5,14 @@ Authors: Eric Hearn
 -/
 
 /-!
-# KM_Inspect Scaffold
+# TAIL Scaffold
 
 Generate a new Kim Morrison Standard project structure.
 
 ## Usage
 
 ```bash
-lake exe kmscaffold <ProjectName>
+lake exe tailscaffold <ProjectName>
 ```
 
 Creates:
@@ -26,7 +26,7 @@ Creates:
   - lean-toolchain
 -/
 
-namespace KM_Inspect.Scaffold
+namespace TAIL.Scaffold
 
 /-- Create a directory if it doesn't exist -/
 def ensureDir (path : System.FilePath) : IO Unit := do
@@ -201,14 +201,14 @@ def scaffold (projectName : String) : IO Unit := do
   IO.println "     (Remember: only Mathlib imports allowed!)"
   IO.println "  5. Add supporting lemmas in Proofs/"
   IO.println "  6. Complete the proof in ProofOfMainTheorem.lean"
-  IO.println "  7. Run 'lake exe kmverify' to verify compliance"
+  IO.println "  7. Run 'lake exe tailverify' to verify compliance"
 
 /-- Main entry point -/
 def main (args : List String) : IO UInt32 := do
   match args with
   | [projectName] =>
     if projectName.startsWith "-" then
-      IO.eprintln "Usage: lake exe kmscaffold <ProjectName>"
+      IO.eprintln "Usage: lake exe tailscaffold <ProjectName>"
       IO.eprintln ""
       IO.eprintln "Creates a new Kim Morrison Standard project structure."
       return 1
@@ -219,7 +219,7 @@ def main (args : List String) : IO UInt32 := do
       IO.eprintln s!"Error: {e}"
       return 1
   | _ =>
-    IO.eprintln "Usage: lake exe kmscaffold <ProjectName>"
+    IO.eprintln "Usage: lake exe tailscaffold <ProjectName>"
     IO.eprintln ""
     IO.eprintln "Creates a new Kim Morrison Standard project structure."
     IO.eprintln ""
@@ -230,11 +230,11 @@ def main (args : List String) : IO UInt32 := do
     IO.eprintln "  - mainTheorem : StatementOfTheorem proven in ProofOfMainTheorem"
     IO.eprintln ""
     IO.eprintln "Example:"
-    IO.eprintln "  lake exe kmscaffold MyTheorem"
+    IO.eprintln "  lake exe tailscaffold MyTheorem"
     return 1
 
-end KM_Inspect.Scaffold
+end TAIL.Scaffold
 
 /-- Entry point when run with lake exe -/
 def main (args : List String) : IO UInt32 :=
-  KM_Inspect.Scaffold.main args
+  TAIL.Scaffold.main args

@@ -1,4 +1,6 @@
-# KM_Inspect
+# TAIL
+
+**T**emplate for **AI**-generated **L**ean
 
 A verification tool for Lean 4 projects that aims to reduce the review burden for AI generated mathematical proofs
 
@@ -80,23 +82,23 @@ lake build
 
 ```bash
 # Run from the target project's root directory
-lake exe kmverify
+lake exe tailverify
 
 # Or specify the project path
-lake exe kmverify /path/to/project
+lake exe tailverify /path/to/project
 
 # JSON output for CI integration
-lake exe kmverify --json
+lake exe tailverify --json
 
 # Write output to file
-lake exe kmverify --output report.txt
+lake exe tailverify --output report.txt
 ```
 
 ### Creating a New Project
 
 ```bash
 # Generate a Kim Morrison Standard project structure
-lake exe kmscaffold MyTheorem
+lake exe tailscaffold MyTheorem
 cd MyTheorem
 lake update
 lake exe cache get
@@ -143,9 +145,9 @@ RESULT: PROJECT VERIFIED
 
 ## Integrating Into Your Project
 
-1. Add KM_Inspect as a dependency in your `lakefile.lean`:
+1. Add TAIL as a dependency in your `lakefile.lean`:
    ```lean
-   require KM_Inspect from git
+   require TAIL from git
      "https://github.com/e-vergo/KM_Inspection"
 
    require lean4checker from git
@@ -161,7 +163,7 @@ RESULT: PROJECT VERIFIED
    - `{ProjectPrefix}/MainTheorem.lean` with only Mathlib imports
    - `{ProjectPrefix}/ProofOfMainTheorem.lean` using module system
 
-3. Run `lake exe kmverify`
+3. Run `lake exe tailverify`
 
 No configuration file needed - project prefix is auto-detected from `lakefile.lean`.
 

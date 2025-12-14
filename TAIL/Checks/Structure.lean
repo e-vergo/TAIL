@@ -3,9 +3,9 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
-import KM_Inspect.Environment
+import TAIL.Types
+import TAIL.Config
+import TAIL.Environment
 
 /-!
 # Structure Check
@@ -18,7 +18,7 @@ Verify that required declarations exist with correct types:
 This is the core semantic verification per the Kim Morrison Standard.
 -/
 
-namespace KM_Inspect.Checks
+namespace TAIL.Checks
 
 open Lean Meta
 
@@ -73,8 +73,8 @@ structure TypeVerificationResult where
 /-- Verify that StatementOfTheorem : Prop and mainTheorem : StatementOfTheorem -/
 def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
   let env ← getEnv
-  let statementName := resolved.statementName
-  let theoremName := resolved.theoremName
+  let statementName := resolved.statementName'
+  let theoremName := resolved.theoremName'
   let mainModule := resolved.mainTheoremModule
 
   let mut details : List String := []
@@ -101,14 +101,14 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
   let statementType := statementInfo.type
 
   -- First check syntactically
-  let isPropSyntactic := KM_Inspect.isPropSyntactic statementType
+  let isPropSyntactic := TAIL.isPropSyntactic statementType
 
   -- Then check definitionally if needed
   let (statementIsProp, equalityMethod) ← do
     if isPropSyntactic then
       pure (true, "syntactic")
     else
-      let isPropDef ← KM_Inspect.isPropDefEq statementType
+      let isPropDef ← TAIL.isPropDefEq statementType
       pure (isPropDef, "definitional")
 
   if !statementIsProp then
@@ -124,7 +124,7 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
   let theoremInfo ← match env.find? theoremName with
     | some (.thmInfo tinfo) => pure tinfo
     | some info =>
-      let kind := KM_Inspect.getDeclKind info
+      let kind := TAIL.getDeclKind info
       return CheckResult.fail "Structure"
         s!"'{theoremName}' exists but is a {kind}, not a theorem" []
     | none =>
@@ -160,4 +160,4 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
   return CheckResult.pass "Structure"
     s!"Verified: {statementName} : Prop, {theoremName} : {statementName}"
 
-end KM_Inspect.Checks
+end TAIL.Checks

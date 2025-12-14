@@ -3,10 +3,10 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
+import TAIL.Types
 
 /-!
-# KM_Inspect Configuration
+# TAIL Configuration
 
 Auto-detect project configuration from lakefile.lean with hardcoded Kim Morrison Standard names.
 
@@ -15,23 +15,23 @@ No configuration file needed - all names are standardized:
 - StatementOfTheorem, mainTheorem
 -/
 
-namespace KM_Inspect
+namespace TAIL
 
 open Lean
 
 /-! ## Hardcoded Kim Morrison Standard Names -/
 
 /-- Standard file name for the theorem statement -/
-def kmMainTheoremFile : String := "MainTheorem.lean"
+def mainTheoremFile : String := "MainTheorem.lean"
 
 /-- Standard file name for the theorem proof -/
-def kmProofOfMainTheoremFile : String := "ProofOfMainTheorem.lean"
+def proofOfMainTheoremFile : String := "ProofOfMainTheorem.lean"
 
 /-- Standard name for the statement definition -/
-def kmStatementName : String := "StatementOfTheorem"
+def statementName : String := "StatementOfTheorem"
 
 /-- Standard name for the main theorem -/
-def kmTheoremName : String := "mainTheorem"
+def theoremName : String := "mainTheorem"
 
 /-! ## Resolved Configuration -/
 
@@ -55,13 +55,13 @@ private def parseDottedName (s : String) : Name :=
 
 /-- Fully qualified name for StatementOfTheorem.
     In Lean 4, top-level declarations go to root namespace, so it's just `StatementOfTheorem`. -/
-def ResolvedConfig.statementName (_ : ResolvedConfig) : Name :=
-  kmStatementName.toName
+def ResolvedConfig.statementName' (_ : ResolvedConfig) : Name :=
+  statementName.toName
 
 /-- Fully qualified name for mainTheorem.
     In Lean 4, top-level declarations go to root namespace, so it's just `mainTheorem`. -/
-def ResolvedConfig.theoremName (_ : ResolvedConfig) : Name :=
-  kmTheoremName.toName
+def ResolvedConfig.theoremName' (_ : ResolvedConfig) : Name :=
+  theoremName.toName
 
 /-- Module name for MainTheorem -/
 def ResolvedConfig.mainTheoremModule (rc : ResolvedConfig) : Name :=
@@ -118,17 +118,17 @@ def resolveWithPrefix (projectRoot : System.FilePath) (projectPrefix : String) :
     return .error s!"Source directory not found: {sourcePath}"
 
   -- Resolve paths using hardcoded names
-  let mainTheoremPath := sourcePath / kmMainTheoremFile
-  let proofOfMainTheoremPath := sourcePath / kmProofOfMainTheoremFile
+  let mainTheoremPath := sourcePath / mainTheoremFile
+  let proofOfMainTheoremPath := sourcePath / proofOfMainTheoremFile
 
   -- Verify required files exist
   let mainExists ← mainTheoremPath.pathExists
   if !mainExists then
-    return .error s!"{kmMainTheoremFile} not found: {mainTheoremPath}"
+    return .error s!"{mainTheoremFile} not found: {mainTheoremPath}"
 
   let proofExists ← proofOfMainTheoremPath.pathExists
   if !proofExists then
-    return .error s!"{kmProofOfMainTheoremFile} not found: {proofOfMainTheoremPath}"
+    return .error s!"{proofOfMainTheoremFile} not found: {proofOfMainTheoremPath}"
 
   return .ok {
     projectPrefix
@@ -157,4 +157,4 @@ def getTrustLevel (resolved : ResolvedConfig) (path : System.FilePath) : TrustLe
   else
     TrustLevel.ProofOfMainTheorem
 
-end KM_Inspect
+end TAIL

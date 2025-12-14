@@ -3,33 +3,33 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
-import KM_Inspect.FileUtils
-import KM_Inspect.Report
-import KM_Inspect.Checks.Structure
-import KM_Inspect.Checks.Soundness
-import KM_Inspect.Checks.ProofMinimality
-import KM_Inspect.Checks.Imports
-import KM_Inspect.Checks.MainTheoremPurity
-import KM_Inspect.Checks.Lean4Checker
+import TAIL.Types
+import TAIL.Config
+import TAIL.FileUtils
+import TAIL.Report
+import TAIL.Checks.Structure
+import TAIL.Checks.Soundness
+import TAIL.Checks.ProofMinimality
+import TAIL.Checks.Imports
+import TAIL.Checks.MainTheoremPurity
+import TAIL.Checks.Lean4Checker
 
 /-!
-# KM_Inspect Main
+# TAIL Main
 
 CLI entry point and orchestration for Kim Morrison Standard verification.
 
 ## Usage
 
 ```bash
-lake exe kmverify [directory] [--json]
+lake exe tailverify [directory] [--json]
 ```
 
 If directory is not provided, uses current directory.
 Project prefix is auto-detected from lakefile.lean.
 -/
 
-namespace KM_Inspect
+namespace TAIL
 
 open Lean Meta
 
@@ -125,7 +125,7 @@ def parseArgs (args : List String) : IO CLIArgs := do
       if i < argsArray.size then
         result := { result with projectPrefix := some argsArray[i]! }
     else if arg == "--help" || arg == "-h" then
-      IO.println "Usage: lake exe kmverify [directory] [--prefix NAME] [--report] [--output FILE]"
+      IO.println "Usage: lake exe tailverify [directory] [--prefix NAME] [--report] [--output FILE]"
       IO.println ""
       IO.println "Verify a Lean project follows the Kim Morrison Standard."
       IO.println ""
@@ -136,7 +136,7 @@ def parseArgs (args : List String) : IO CLIArgs := do
       IO.println "  -p, --prefix Override project prefix (default: auto-detect from lakefile)"
       IO.println "  --json       Output in JSON format"
       IO.println "  --text       Output in text format (default)"
-      IO.println "  -r, --report Generate km_compliance_report.txt in project root"
+      IO.println "  -r, --report Generate tail_compliance_report.txt in project root"
       IO.println "  -o, --output Write output to FILE"
       IO.println "  -h, --help   Show this help"
       IO.Process.exit 0
@@ -171,7 +171,7 @@ def main (args : List String) : IO UInt32 := do
       let env ← Lean.importModules imports {}
 
       let (report, _) ← Lean.Core.CoreM.toIO
-        (ctx := { fileName := "KM_Inspect", fileMap := default, options := {} })
+        (ctx := { fileName := "TAIL", fileMap := default, options := {} })
         (s := { env })
         (Lean.Meta.MetaM.run' (runVerification resolved))
 
@@ -180,7 +180,7 @@ def main (args : List String) : IO UInt32 := do
 
       -- Generate compliance report file if requested
       if cliArgs.generateReport then
-        let reportPath := cliArgs.projectRoot / "km_compliance_report.txt"
+        let reportPath := cliArgs.projectRoot / "tail_compliance_report.txt"
         printReport report .text (some reportPath)
         IO.println s!"Compliance report written to: {reportPath}"
 
@@ -190,8 +190,8 @@ def main (args : List String) : IO UInt32 := do
       IO.eprintln "Make sure to run 'lake build' first."
       return (3 : UInt32)  -- Exit code 3 for build error
 
-end KM_Inspect
+end TAIL
 
 /-- Entry point when run with `lean --run` -/
 def main (args : List String) : IO UInt32 :=
-  KM_Inspect.main args
+  TAIL.main args

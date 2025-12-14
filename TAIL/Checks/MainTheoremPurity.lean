@@ -3,9 +3,9 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
-import KM_Inspect.Environment
+import TAIL.Types
+import TAIL.Config
+import TAIL.Environment
 
 /-!
 # MainTheorem Purity Check
@@ -14,7 +14,7 @@ Verify MainTheorem.lean contains no lemmas or theorems (only defs).
 Uses environment introspection instead of text-based parsing.
 -/
 
-namespace KM_Inspect.Checks
+namespace TAIL.Checks
 
 open Lean Meta
 
@@ -24,17 +24,17 @@ def checkMainTheoremPurity (resolved : ResolvedConfig) : MetaM CheckResult := do
   let mainModule := resolved.mainTheoremModule
 
   -- Get all declarations in the MainTheorem module
-  let decls := KM_Inspect.getModuleDeclarations env mainModule
+  let decls := TAIL.getModuleDeclarations env mainModule
 
   -- Find theorems (which are forbidden in MainTheorem.lean)
   let theorems := decls.filter fun name =>
-    if KM_Inspect.isInternalName name then false
+    if TAIL.isInternalName name then false
     else match env.find? name with
       | some (.thmInfo _) => true
       | _ => false
 
   -- Check that the statement definition exists
-  let statementName := resolved.statementName
+  let statementName := resolved.statementName'
   let hasStatement := decls.any (· == statementName)
 
   let mut details : List String := []
@@ -52,11 +52,11 @@ def checkMainTheoremPurity (resolved : ResolvedConfig) : MetaM CheckResult := do
     details := details ++ [s!"'{statementName}' not found"]
 
   if passed then
-    let declCount := decls.filter (!KM_Inspect.isInternalName ·) |>.length
+    let declCount := decls.filter (!TAIL.isInternalName ·) |>.length
     return CheckResult.pass "MainTheorem Purity"
       s!"Contains {declCount} allowed declarations"
   else
     return CheckResult.fail "MainTheorem Purity"
       "MainTheorem.lean contains disallowed declarations" details
 
-end KM_Inspect.Checks
+end TAIL.Checks

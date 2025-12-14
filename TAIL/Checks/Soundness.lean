@@ -3,8 +3,8 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import KM_Inspect.Types
-import KM_Inspect.Config
+import TAIL.Types
+import TAIL.Config
 
 /-!
 # Soundness Check
@@ -34,7 +34,7 @@ native code generation. Mathlib and serious verification projects avoid it.
 The internal constant for `native_decide` is `Lean.ofReduceBool`.
 -/
 
-namespace KM_Inspect.Checks
+namespace TAIL.Checks
 
 open Lean Meta
 
@@ -275,4 +275,4 @@ def checkSoundness (resolved : ResolvedConfig) : MetaM CheckResult := do
     ].filterMap id |> String.intercalate ", "
     return CheckResult.fail "Soundness" issues details
 
-end KM_Inspect.Checks
+end TAIL.Checks
