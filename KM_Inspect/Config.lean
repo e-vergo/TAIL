@@ -86,23 +86,23 @@ def extractProjectPrefix (projectRoot : System.FilePath) : IO (Except String Str
     -- Parse TOML format: name = "ProjectName"
     let content ← IO.FS.readFile tomlPath
     for line in content.splitOn "\n" do
-      let trimmed := line.trim
+      let trimmed := line.trimAscii
       if trimmed.startsWith "name = " then
         let rest := trimmed.drop 7  -- "name = ".length
-        let name := rest.trim.dropWhile (· == '"') |> (·.dropRightWhile (· == '"'))
+        let name := rest.trimAscii.dropWhile (· == '"') |> (·.dropEndWhile (· == '"'))
         if name.isEmpty then continue
-        return .ok name
+        return .ok name.toString
     return .error "Could not find 'name = \"...\"' in lakefile.toml"
 
   -- Parse lakefile.lean: package <Name> where
   let content ← IO.FS.readFile lakefilePath
   for line in content.splitOn "\n" do
-    let trimmed := line.trim
+    let trimmed := line.trimAscii
     if trimmed.startsWith "package " then
       let rest := trimmed.drop 8  -- "package ".length
       let name := rest.takeWhile (fun c => c != ' ' && c != '\n')
       if name.isEmpty then continue
-      return .ok name
+      return .ok name.toString
   return .error "Could not find 'package <Name> where' in lakefile.lean"
 
 /-! ## Resolution -/
