@@ -1,10 +1,6 @@
 module
 
-import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Tactic
-
 
 open Finset
 

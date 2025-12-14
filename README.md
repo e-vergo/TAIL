@@ -1,14 +1,10 @@
 # KM_Inspect
 
-A verification tool for Lean 4 projects that checks compliance with the **Kim Morrison Standard** for AI-assisted formal mathematics.
-
-## The Problem
-
-When AI generates formal proofs, how can humans efficiently verify they're legitimate? A 10,000-line proof might be machine-checked, but without understanding the definitions, how do we know it proves what we think it proves?
+A verification tool for Lean 4 projects that aims to reduce the review burden for AI generated mathematical proofs
 
 ## The Kim Morrison Standard
 
-[Kim Morrison proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/with/558843568) a strict solution:
+[Kim Morrison proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.20proofs/near/556956052) a strict solution:
 
 > Projects "don't count" unless:
 > - They contain a file `MainTheorem.lean`, which has **no imports outside of Mathlib**, and contains the main result as `def StatementOfTheorem : Prop := ...`
@@ -180,18 +176,3 @@ No configuration file needed - project prefix is auto-detected from `lakefile.le
 ## License
 
 Apache 2.0
-
-
-## Original Zulip Post
-
-"Kim Morrison: 
-
-I think Eric Vergo's example above is interesting to look at. There's no doubt that the AIs are already capable of creating repositories with correct (perhaps not interesting) mathematics, checked by Lean.Kim Morrison: Let me restrict attention for a moment to projects where essentially all the definitions required for stating the final result are in Mathlib (I think this is true for Eric's example). (Implicitly saying that either I don't trust AIs to assist with projects where this isn't true, or at least that I expect a human to PR the definitional parts to Mathlib before I care to even consider the AI generated proof.)Kim Morrison: I think we should agree, and provide associated tooling, that such projects "don't count" unless:
-
-They contain a file MainTheorem.lean, which has no imports outside of Mathlib, and contains the main result of the repository as a def StatementOfTheorem : Prop := ....
-They contain a file ProofOfMainTheorem.lean containing nothing besides theorem mainTheorem : StatementOfTheorem := ... (and which may import arbitrary files from the project)
-
-In fact, when the module system arrives (hopefully later today!) we can even ask that in ProofOfMainTheorem.lean, the only public imports are from Mathlib (i.e. all the repository imports are only used in the private context, e.g. proofs). This has the consequence that import ProofOfMainTheorem will add precisely two declarations to the public context: the statement and proof. This significantly reduces the complexity for a human reviewer!Kim Morrison: What do people think?
-
-I think we could write up a document explaining this criteria, and write a simple tool that verifies that a project fulfills these requirements (and probably runs the various sanity checkers too).
-Then whenever someone advertises a new AI generated repository, it might be as simple as @mentioning a bot that runs the tool, and if if fails replies with a link to the document. :-)"
