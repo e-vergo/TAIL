@@ -1,11 +1,17 @@
 module
 
 import Mathlib.Tactic
+import Mathlib.Data.Real.Basic
 
 open Finset
 
+noncomputable def foo (N k : ℕ) : ℝ := (N * k + 1 : ℝ)
+
 /-- Product of consecutive naturals is even -/
-axiom two_dvd_mul_succ (n : ℕ) : 2 ∣ n * (n + 1)
+lemma two_dvd_mul_succ (n : ℕ) : 2 ∣ n * (n + 1) := by
+  rcases Nat.even_or_odd n with ⟨k, rfl⟩ | ⟨k, rfl⟩
+  · exact ⟨k * (2 * k + 1), by ring⟩
+  · exact ⟨(2 * k + 1) * (k + 1), by ring⟩
 
 /-- Sum of first n+1 naturals equals n(n+1)/2 -/
 lemma sum_range_eq (n : ℕ) : ∑ k ∈ range (n + 1), k = n * (n + 1) / 2 := by
@@ -41,4 +47,10 @@ lemma sum_cubes_step (n : ℕ) :
     _ = b ^ 2 := by rw [hab]
 
 /-- Sum of cubes equals square of sum (closed form) -/
-axiom sum_cubes_eq (n : ℕ) : ∑ k ∈ range (n + 1), k ^ 3 = (n * (n + 1) / 2) ^ 2
+lemma sum_cubes_eq (n : ℕ) :
+    ∑ k ∈ range (n + 1), k ^ 3 = (n * (n + 1) / 2) ^ 2 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [sum_range_succ, ih]
+    exact sum_cubes_step n

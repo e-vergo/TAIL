@@ -11,6 +11,8 @@ These fixtures contain intentional violations that TAIL should detect.
 ✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/UseSorry (Soundness)
 ✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/UseNativeDecide (Soundness)
 ✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/CustomAxiom (Soundness)
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Soundness/OpaqueDef (Soundness)
+    Error loading fixture: object file '/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean/TestFixtures/ViolationDetection/Soundness/OpaqueDef/ProofOfMainTheorem.olean' of module TestFixtures.ViolationDetection.Soundness.OpaqueDef.ProofOfMainTheorem does not exist
 ✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/MultipleTheorems (ProofMinimality)
 ✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/ExtraDefinition (ProofMinimality)
 ✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/ZeroTheorems (ProofMinimality)
@@ -45,7 +47,7 @@ These fixtures are valid and should pass all checks.
 ✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ModuleVisibility/PublicReexports (ModuleVisibility)
 
 ----------------------------------------------------------------------
-Violation Detection: 13/15 violations correctly detected
+Violation Detection: 13/16 violations correctly detected
 False Positive Prevention: 17/17 valid fixtures correctly passed
-Total: 30/32 tests passed
+Total: 30/33 tests passed
 ======================================================================

@@ -1,12 +1,11 @@
 module
 
-public import TestFixtures.ViolationDetection.Soundness.UseSorry.MainTheorem
+public import Example.MainTheorem
 
-import all TestFixtures.ViolationDetection.Soundness.UseSorry.Proofs.helper_lemmas
+import all Example.Proofs.helper_lemmas
 
 @[expose] public section
 
--- VIOLATION: uses sorry
-theorem mainTheorem : StatementOfTheorem := by
-  intro n
+/-- Proof of the proposition defined in maintheorem.lean using helper lemmas from Proofs.helper_lemmas -/
+theorem mainTheorem : StatementOfTheorem := fun n => by
   sorry

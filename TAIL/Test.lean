@@ -47,6 +47,10 @@ def allTestCases : List TestCase := [
     checkType := .soundness
     expectFailure := true
     expectedMessage := "axiom" },
+  { fixtureDir := "TestFixtures/ViolationDetection/Soundness/OpaqueDef"
+    checkType := .soundness
+    expectFailure := true
+    expectedMessage := "Opaque" },
 
   -- ProofMinimality violations
   { fixtureDir := "TestFixtures/ViolationDetection/ProofMinimality/MultipleTheorems"
