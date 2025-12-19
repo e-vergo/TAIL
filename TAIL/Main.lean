@@ -12,6 +12,7 @@ import TAIL.Checks.Soundness
 import TAIL.Checks.ProofMinimality
 import TAIL.Checks.Imports
 import TAIL.Checks.MainTheoremPurity
+import TAIL.Checks.DefinitionsPurity
 import TAIL.Checks.Lean4Checker
 
 /-!
@@ -35,19 +36,43 @@ open Lean Meta
 
 /-! ## Statistics Collection -/
 
-/-- Collect project statistics (simplified for strict Kim Morrison standard) -/
+/-- Count lines in all .lean files in a directory -/
+def countDirLines (dir : System.FilePath) : IO TierStats := do
+  let mut fileCount := 0
+  let mut lineCount := 0
+  let entries ← dir.readDir
+  for entry in entries do
+    if entry.fileName.endsWith ".lean" then
+      let lines ← countLines entry.path
+      fileCount := fileCount + 1
+      lineCount := lineCount + lines
+  return { fileCount, lineCount }
+
+/-- Collect project statistics -/
 def collectStats (resolved : ResolvedConfig) : IO ProjectStats := do
   -- MainTheorem
   let mainLines ← countLines resolved.mainTheoremPath
   let mainStats : TierStats := { fileCount := 1, lineCount := mainLines }
 
+  -- Definitions/ (if present)
+  let definitionsStats ← match resolved.definitionsPath with
+    | some path => countDirLines path
+    | none => pure { fileCount := 0, lineCount := 0 }
+
   -- ProofOfMainTheorem
   let proofOfMainLines ← countLines resolved.proofOfMainTheoremPath
   let proofOfMainStats : TierStats := { fileCount := 1, lineCount := proofOfMainLines }
 
+  -- Proofs/ (if present)
+  let proofsStats ← match resolved.proofsPath with
+    | some path => countDirLines path
+    | none => pure { fileCount := 0, lineCount := 0 }
+
   return {
     mainTheorem := mainStats
+    definitions := definitionsStats
     proofOfMainTheorem := proofOfMainStats
+    proofs := proofsStats
   }
 
 /-! ## Check Orchestration -/
@@ -62,10 +87,11 @@ def runMetaChecks (resolved : ResolvedConfig) : MetaM (List CheckResult) := do
   let structure_ ← Checks.checkStructure resolved
   let soundness ← Checks.checkSoundness resolved
   let proofMinimality ← Checks.checkProofMinimality resolved
-  let mainPurity ← Checks.checkMainTheoremPurity resolved
+  let statementPurity ← Checks.checkStatementPurity resolved
+  let definitionsPurity ← Checks.checkDefinitionsPurity resolved
   let imports ← Checks.checkImports resolved  -- Now MetaM-based (re-import test)
 
-  return [structure_, soundness, proofMinimality, mainPurity, imports]
+  return [structure_, soundness, proofMinimality, statementPurity, definitionsPurity, imports]
 
 /-- Run all checks and build report -/
 def runVerification (resolved : ResolvedConfig) : MetaM VerificationReport := do
@@ -100,6 +126,7 @@ structure CLIArgs where
   outputPath : Option System.FilePath := none
   generateReport : Bool := false  -- Auto-generate compliance report file
   projectPrefix : Option String := none  -- Override auto-detected prefix
+  mode : VerificationMode := .default  -- Verification mode
   deriving Repr
 
 /-- Parse command line arguments -/
@@ -114,6 +141,8 @@ def parseArgs (args : List String) : IO CLIArgs := do
       result := { result with format := .json }
     else if arg == "--text" then
       result := { result with format := .text }
+    else if arg == "--strict" then
+      result := { result with mode := .strict }
     else if arg == "--report" || arg == "-r" then
       result := { result with generateReport := true }
     else if arg == "--output" || arg == "-o" then
@@ -125,7 +154,7 @@ def parseArgs (args : List String) : IO CLIArgs := do
       if i < argsArray.size then
         result := { result with projectPrefix := some argsArray[i]! }
     else if arg == "--help" || arg == "-h" then
-      IO.println "Usage: lake exe tailverify [directory] [--prefix NAME] [--report] [--output FILE]"
+      IO.println "Usage: lake exe tailverify [directory] [--strict] [--prefix NAME] [--report] [--output FILE]"
       IO.println ""
       IO.println "Verify a Lean project follows the Kim Morrison Standard."
       IO.println ""
@@ -133,6 +162,7 @@ def parseArgs (args : List String) : IO CLIArgs := do
       IO.println "  directory    Project root (default: current directory)"
       IO.println ""
       IO.println "Options:"
+      IO.println "  --strict     Strict mode: original Kim Morrison Standard (no Definitions/ folder)"
       IO.println "  -p, --prefix Override project prefix (default: auto-detect from lakefile)"
       IO.println "  --json       Output in JSON format"
       IO.println "  --text       Output in text format (default)"
@@ -152,8 +182,8 @@ def main (args : List String) : IO UInt32 := do
 
   -- Resolve configuration (use explicit prefix if provided, otherwise auto-detect)
   let configResult ← match cliArgs.projectPrefix with
-    | some pfx => resolveWithPrefix cliArgs.projectRoot pfx
-    | none => resolveFromDirectory cliArgs.projectRoot
+    | some pfx => resolveWithPrefix cliArgs.projectRoot pfx cliArgs.mode
+    | none => resolveFromDirectory cliArgs.projectRoot cliArgs.mode
 
   match configResult with
   | .error e =>

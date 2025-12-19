@@ -15,21 +15,50 @@ namespace TAIL
 
 open Lean
 
+/-! ## Verification Mode -/
+
+/-- Verification modes for the Kim Morrison Standard.
+    Strict enforces the original proposal; Default allows Definitions/ folder. -/
+inductive VerificationMode where
+  /-- Original Kim Morrison Standard: MainTheorem.lean contains only StatementOfTheorem -/
+  | strict
+  /-- Extended standard: allows Definitions/ folder for supporting types -/
+  | default
+  deriving DecidableEq, Repr, Inhabited
+
+instance : ToString VerificationMode where
+  toString
+    | .strict => "strict"
+    | .default => "default"
+
 /-! ## Trust Levels -/
 
 /-- Trust tiers for the Kim Morrison Standard.
-The strict standard has only two tiers: statement and proof. -/
+    Files are classified as either requiring human review or machine-verified. -/
 inductive TrustLevel where
-  /-- Statement file: Mathlib-only imports, contains only StatementOfTheorem def -/
+  /-- Statement file: Mathlib-only imports, contains StatementOfTheorem def -/
   | MainTheorem
+  /-- Definitions folder: supporting types/structures (default mode only, human review) -/
+  | Definitions
   /-- Proof file: uses module system, exactly one public theorem -/
   | ProofOfMainTheorem
+  /-- Proofs folder: helper lemmas (machine verified) -/
+  | Proofs
   deriving DecidableEq, Repr, Inhabited
 
 instance : ToString TrustLevel where
   toString
     | .MainTheorem => "MainTheorem"
+    | .Definitions => "Definitions"
     | .ProofOfMainTheorem => "ProofOfMainTheorem"
+    | .Proofs => "Proofs"
+
+/-- Whether a trust level requires human review -/
+def TrustLevel.requiresHumanReview : TrustLevel → Bool
+  | .MainTheorem => true
+  | .Definitions => true
+  | .ProofOfMainTheorem => false
+  | .Proofs => false
 
 /-! ## Check Results -/
 
@@ -77,26 +106,33 @@ instance : ToJson TierStats where
     ("line_count", toJson s.lineCount)
   ]
 
-/-- Aggregated statistics for the two trust tiers -/
+/-- Aggregated statistics for trust tiers -/
 structure ProjectStats where
   mainTheorem : TierStats
+  definitions : TierStats  -- Only used in default mode
   proofOfMainTheorem : TierStats
+  proofs : TierStats  -- Helper lemmas folder
   deriving Inhabited, Repr
 
 /-- Calculate total lines in the project -/
 def ProjectStats.totalLines (s : ProjectStats) : Nat :=
   s.mainTheorem.lineCount +
-  s.proofOfMainTheorem.lineCount
+  s.definitions.lineCount +
+  s.proofOfMainTheorem.lineCount +
+  s.proofs.lineCount
 
 /-- Calculate review burden (lines requiring human review).
-Per Kim Morrison standard, only MainTheorem.lean requires review. -/
+In default mode: MainTheorem.lean + Definitions/
+In strict mode: MainTheorem.lean only (definitions will be empty) -/
 def ProjectStats.reviewBurden (s : ProjectStats) : Nat :=
-  s.mainTheorem.lineCount
+  s.mainTheorem.lineCount + s.definitions.lineCount
 
 instance : ToJson ProjectStats where
   toJson s := Json.mkObj [
     ("main_theorem", toJson s.mainTheorem),
+    ("definitions", toJson s.definitions),
     ("proof_of_main_theorem", toJson s.proofOfMainTheorem),
+    ("proofs", toJson s.proofs),
     ("total_lines", toJson s.totalLines),
     ("review_burden", toJson s.reviewBurden)
   ]

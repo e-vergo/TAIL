@@ -6,8 +6,8 @@ package TAIL where
   keywords := #["verification", "formal-methods", "lean4"]
   leanOptions := #[
     ⟨`pp.unicode.fun, true⟩,
-    ⟨`relaxedAutoImplicit, false⟩,
-    ⟨`experimental.module, true⟩  -- Enable module system for Kim Morrison Standard
+    ⟨`relaxedAutoImplicit, false⟩
+    -- Note: experimental.module is no longer required as of Lean 4.27+
   ]
 
 require mathlib from git

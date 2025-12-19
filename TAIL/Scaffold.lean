@@ -39,8 +39,8 @@ def writeFile (path : System.FilePath) (content : String) : IO Unit := do
   IO.FS.writeFile path content
 
 /-- Generate MainTheorem.lean content (imports only Mathlib per Kim Morrison Standard) -/
-def mainTheoremContent : String :=
-"/-
+def mainTheoremContent (projectName : String) : String :=
+s!"/-
 Copyright (c) 2025. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
@@ -56,16 +56,20 @@ Per the Kim Morrison Standard, this file:
 - Must be fully understood by a human reviewer
 -/
 
+namespace {projectName}
+
 /-- The statement of the main theorem to be proven.
 
 TODO: Replace this with your actual theorem statement.
 All definitions needed must either:
 1. Already exist in Mathlib
-2. Be defined in this file
+2. Be defined in this file or in the Definitions/ folder
 -/
 def StatementOfTheorem : Prop :=
   -- Replace with your theorem statement
   True  -- placeholder
+
+end {projectName}
 "
 
 /-- Generate ProofOfMainTheorem.lean content (uses module system) -/
@@ -91,11 +95,15 @@ Per the Kim Morrison Standard:
 - Contains exactly one theorem in a public section
 -/
 
+namespace {projectName}
+
 public section
 
 theorem mainTheorem : StatementOfTheorem := by
   -- TODO: Replace with your actual proof
   trivial
+
+end {projectName}
 "
 
 /-- Generate Proofs/Support.lean content -/
@@ -130,8 +138,8 @@ package {projectName} where
   version := v!\"0.1.0\"
   leanOptions := #[
     ⟨`pp.unicode.fun, true⟩,
-    ⟨`relaxedAutoImplicit, false⟩,
-    ⟨`experimental.module, true⟩  -- Required for Kim Morrison Standard
+    ⟨`relaxedAutoImplicit, false⟩
+    -- Note: experimental.module is no longer required as of Lean 4.27+
   ]
 
 require mathlib from git
@@ -147,7 +155,7 @@ lean_lib {projectName} where
 
 /-- Generate lean-toolchain content -/
 def toolchainContent : String :=
-  "leanprover/lean4:v4.26.0"
+  "leanprover/lean4:v4.27.0-rc1"
 
 /-- Generate the project structure -/
 def scaffold (projectName : String) : IO Unit := do
@@ -173,7 +181,7 @@ def scaffold (projectName : String) : IO Unit := do
   IO.println "Writing files..."
 
   -- Main project files
-  writeFile (sourceDir / "MainTheorem.lean") mainTheoremContent
+  writeFile (sourceDir / "MainTheorem.lean") (mainTheoremContent projectName)
   IO.println s!"  {projectName}/{projectName}/MainTheorem.lean"
 
   writeFile (sourceDir / "ProofOfMainTheorem.lean") (proofOfMainTheoremContent projectName)

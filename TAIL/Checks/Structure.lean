@@ -39,8 +39,10 @@ def getModuleImports (env : Environment) (moduleName : Name) : Option (Array Imp
   let moduleData := env.header.moduleData[idx.toNat]?
   return moduleData.map (·.imports) |>.getD #[]
 
-/-- Check that MainTheorem.lean only imports from Mathlib (and standard library) -/
-def checkMainTheoremImports (env : Environment) (mainModule : Name) (projectPrefix : String) :
+/-- Check that MainTheorem.lean only imports from allowed sources.
+    In strict mode: only Mathlib allowed
+    In default mode: Mathlib and Definitions/ folder allowed -/
+def checkMainTheoremImports (env : Environment) (mainModule : Name) (resolved : ResolvedConfig) :
     List String × Bool := Id.run do
   let some imports := getModuleImports env mainModule
     | (["Could not retrieve imports for MainTheorem module"], false)
@@ -51,9 +53,15 @@ def checkMainTheoremImports (env : Environment) (mainModule : Name) (projectPref
     let modName := imp.module
     let modStr := modName.toString
 
-    -- Check if this is a project import (not from allowed sources)
-    if modStr.startsWith projectPrefix then
-      violations := violations ++ [s!"  - {modStr} (project import)"]
+    -- Check if this is a project import
+    if modStr.startsWith resolved.projectPrefix then
+      -- In default mode, Definitions/ imports are allowed
+      if resolved.mode == .default && resolved.isDefinitionsModule modName then
+        -- This is fine - Definitions/ imports are allowed in default mode
+        continue
+      else
+        -- Project import not from Definitions/ (or we're in strict mode)
+        violations := violations ++ [s!"  - {modStr} (project import not allowed)"]
     else if !isAllowedImport modName then
       violations := violations ++ [s!"  - {modStr} (non-Mathlib import)"]
 
@@ -79,14 +87,20 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
 
   let mut details : List String := []
 
-  -- Check 0: MainTheorem.lean imports only from Mathlib
-  let (importViolations, importsOk) := checkMainTheoremImports env mainModule resolved.projectPrefix
+  -- Check 0: MainTheorem.lean imports only from allowed sources
+  let (importViolations, importsOk) := checkMainTheoremImports env mainModule resolved
   if !importsOk then
+    let modeNote := if resolved.mode == .strict
+      then "In strict mode, MainTheorem.lean must only import from Mathlib"
+      else "MainTheorem.lean can only import from Mathlib or Definitions/"
     return CheckResult.fail "Structure"
-      "MainTheorem.lean has non-Mathlib imports (Kim Morrison Standard violation)"
-      (["MainTheorem.lean must only import from Mathlib:"] ++ importViolations)
+      "MainTheorem.lean has disallowed imports (Kim Morrison Standard violation)"
+      ([modeNote] ++ importViolations)
 
-  details := details ++ ["MainTheorem.lean imports only from Mathlib"]
+  let importMsg := if resolved.mode == .strict
+    then "MainTheorem.lean imports only from Mathlib"
+    else "MainTheorem.lean imports only from Mathlib/Definitions"
+  details := details ++ [importMsg]
 
   -- Check 1: StatementOfTheorem exists
   let statementInfo ← match env.find? statementName with

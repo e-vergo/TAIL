@@ -12,7 +12,8 @@ Auto-detect project configuration from lakefile.lean with hardcoded Kim Morrison
 
 No configuration file needed - all names are standardized:
 - MainTheorem.lean, ProofOfMainTheorem.lean
-- StatementOfTheorem, mainTheorem
+- Definitions/, Proofs/
+- ProjectName.StatementOfTheorem, ProjectName.mainTheorem
 -/
 
 namespace TAIL
@@ -27,16 +28,24 @@ def mainTheoremFile : String := "MainTheorem.lean"
 /-- Standard file name for the theorem proof -/
 def proofOfMainTheoremFile : String := "ProofOfMainTheorem.lean"
 
-/-- Standard name for the statement definition -/
-def statementName : String := "StatementOfTheorem"
+/-- Standard folder name for definitions (default mode only) -/
+def definitionsFolder : String := "Definitions"
 
-/-- Standard name for the main theorem -/
-def theoremName : String := "mainTheorem"
+/-- Standard folder name for proof helpers -/
+def proofsFolder : String := "Proofs"
+
+/-- Standard name for the statement definition (without namespace) -/
+def statementBaseName : String := "StatementOfTheorem"
+
+/-- Standard name for the main theorem (without namespace) -/
+def theoremBaseName : String := "mainTheorem"
 
 /-! ## Resolved Configuration -/
 
 /-- Resolved configuration with auto-detected project prefix -/
 structure ResolvedConfig where
+  /-- Verification mode (strict or default) -/
+  mode : VerificationMode
   /-- Auto-detected project prefix from lakefile -/
   projectPrefix : String
   /-- Absolute project root path -/
@@ -47,6 +56,10 @@ structure ResolvedConfig where
   mainTheoremPath : System.FilePath
   /-- Absolute path to ProofOfMainTheorem.lean -/
   proofOfMainTheoremPath : System.FilePath
+  /-- Absolute path to Definitions/ folder (default mode only) -/
+  definitionsPath : Option System.FilePath
+  /-- Absolute path to Proofs/ folder (optional) -/
+  proofsPath : Option System.FilePath
   deriving Inhabited, Repr
 
 /-- Parse a dot-separated string into a hierarchical Name -/
@@ -54,14 +67,14 @@ private def parseDottedName (s : String) : Name :=
   s.splitOn "." |>.foldl (fun acc part => acc.str part) Name.anonymous
 
 /-- Fully qualified name for StatementOfTheorem.
-    In Lean 4, top-level declarations go to root namespace, so it's just `StatementOfTheorem`. -/
-def ResolvedConfig.statementName' (_ : ResolvedConfig) : Name :=
-  statementName.toName
+    Per Kim Morrison's suggestion, uses ProjectName.StatementOfTheorem to prevent collisions. -/
+def ResolvedConfig.statementName' (rc : ResolvedConfig) : Name :=
+  parseDottedName s!"{rc.projectPrefix}.{statementBaseName}"
 
 /-- Fully qualified name for mainTheorem.
-    In Lean 4, top-level declarations go to root namespace, so it's just `mainTheorem`. -/
-def ResolvedConfig.theoremName' (_ : ResolvedConfig) : Name :=
-  theoremName.toName
+    Per Kim Morrison's suggestion, uses ProjectName.mainTheorem to prevent collisions. -/
+def ResolvedConfig.theoremName' (rc : ResolvedConfig) : Name :=
+  parseDottedName s!"{rc.projectPrefix}.{theoremBaseName}"
 
 /-- Module name for MainTheorem -/
 def ResolvedConfig.mainTheoremModule (rc : ResolvedConfig) : Name :=
@@ -70,6 +83,22 @@ def ResolvedConfig.mainTheoremModule (rc : ResolvedConfig) : Name :=
 /-- Module name for ProofOfMainTheorem -/
 def ResolvedConfig.proofOfMainTheoremModule (rc : ResolvedConfig) : Name :=
   parseDottedName s!"{rc.projectPrefix}.ProofOfMainTheorem"
+
+/-- Module name prefix for Definitions/ -/
+def ResolvedConfig.definitionsModulePrefix (rc : ResolvedConfig) : Name :=
+  parseDottedName s!"{rc.projectPrefix}.{definitionsFolder}"
+
+/-- Module name prefix for Proofs/ -/
+def ResolvedConfig.proofsModulePrefix (rc : ResolvedConfig) : Name :=
+  parseDottedName s!"{rc.projectPrefix}.{proofsFolder}"
+
+/-- Check if a module is in the Definitions/ folder -/
+def ResolvedConfig.isDefinitionsModule (rc : ResolvedConfig) (moduleName : Name) : Bool :=
+  moduleName.toString.startsWith s!"{rc.projectPrefix}.{definitionsFolder}"
+
+/-- Check if a module is in the Proofs/ folder -/
+def ResolvedConfig.isProofsModule (rc : ResolvedConfig) (moduleName : Name) : Bool :=
+  moduleName.toString.startsWith s!"{rc.projectPrefix}.{proofsFolder}"
 
 /-! ## Lakefile Parsing -/
 
@@ -107,8 +136,8 @@ def extractProjectPrefix (projectRoot : System.FilePath) : IO (Except String Str
 
 /-! ## Resolution -/
 
-/-- Resolve configuration with an explicit project prefix. -/
-def resolveWithPrefix (projectRoot : System.FilePath) (projectPrefix : String) : IO (Except String ResolvedConfig) := do
+/-- Resolve configuration with an explicit project prefix and mode. -/
+def resolveWithPrefix (projectRoot : System.FilePath) (projectPrefix : String) (mode : VerificationMode) : IO (Except String ResolvedConfig) := do
   -- Source directory uses project prefix as name (standard convention)
   let sourcePath := projectRoot / projectPrefix
 
@@ -130,31 +159,82 @@ def resolveWithPrefix (projectRoot : System.FilePath) (projectPrefix : String) :
   if !proofExists then
     return .error s!"{proofOfMainTheoremFile} not found: {proofOfMainTheoremPath}"
 
+  -- Check for optional Definitions/ folder
+  let definitionsPath := sourcePath / definitionsFolder
+  let definitionsExists ← definitionsPath.pathExists
+  let definitionsOpt := if definitionsExists then some definitionsPath else none
+
+  -- In strict mode, Definitions/ folder is not allowed
+  if mode == .strict && definitionsExists then
+    return .error s!"Definitions/ folder found but strict mode is enabled. Use default mode or remove {definitionsPath}"
+
+  -- Check for optional Proofs/ folder
+  let proofsPath := sourcePath / proofsFolder
+  let proofsExists ← proofsPath.pathExists
+  let proofsOpt := if proofsExists then some proofsPath else none
+
   return .ok {
+    mode
     projectPrefix
     projectRoot
     sourcePath
     mainTheoremPath
     proofOfMainTheoremPath
+    definitionsPath := definitionsOpt
+    proofsPath := proofsOpt
   }
 
 /-- Resolve configuration from a directory path.
     Auto-detects project prefix from lakefile and uses hardcoded standard names. -/
-def resolveFromDirectory (projectRoot : System.FilePath) : IO (Except String ResolvedConfig) := do
+def resolveFromDirectory (projectRoot : System.FilePath) (mode : VerificationMode := .default) : IO (Except String ResolvedConfig) := do
   -- Extract project prefix from lakefile
   match ← extractProjectPrefix projectRoot with
   | .error e => return .error e
-  | .ok projectPrefix => resolveWithPrefix projectRoot projectPrefix
+  | .ok projectPrefix => resolveWithPrefix projectRoot projectPrefix mode
 
 /-! ## Trust Level Detection -/
 
-/-- Determine trust level for a file path.
-    In the strict Kim Morrison standard, there are only two tiers. -/
+/-- Determine trust level for a file path. -/
 def getTrustLevel (resolved : ResolvedConfig) (path : System.FilePath) : TrustLevel :=
   let pathStr := path.toString
   if pathStr == resolved.mainTheoremPath.toString then
     TrustLevel.MainTheorem
-  else
+  else if pathStr == resolved.proofOfMainTheoremPath.toString then
     TrustLevel.ProofOfMainTheorem
+  else if let some defPath := resolved.definitionsPath then
+    if pathStr.startsWith defPath.toString then
+      TrustLevel.Definitions
+    else if let some proofsPath := resolved.proofsPath then
+      if pathStr.startsWith proofsPath.toString then
+        TrustLevel.Proofs
+      else
+        TrustLevel.Proofs  -- Default to Proofs for other project files
+    else
+      TrustLevel.Proofs
+  else if let some proofsPath := resolved.proofsPath then
+    if pathStr.startsWith proofsPath.toString then
+      TrustLevel.Proofs
+    else
+      TrustLevel.Proofs
+  else
+    TrustLevel.Proofs
+
+/-- Determine trust level for a module name. -/
+def getTrustLevelForModule (resolved : ResolvedConfig) (moduleName : Name) : TrustLevel :=
+  let modStr := moduleName.toString
+  if moduleName == resolved.mainTheoremModule then
+    TrustLevel.MainTheorem
+  else if moduleName == resolved.proofOfMainTheoremModule then
+    TrustLevel.ProofOfMainTheorem
+  else if resolved.isDefinitionsModule moduleName then
+    TrustLevel.Definitions
+  else if resolved.isProofsModule moduleName then
+    TrustLevel.Proofs
+  else if modStr.startsWith resolved.projectPrefix then
+    -- Other project modules default to Proofs (machine verified)
+    TrustLevel.Proofs
+  else
+    -- Non-project modules (Mathlib, etc.) - shouldn't happen in normal use
+    TrustLevel.Proofs
 
 end TAIL

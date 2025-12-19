@@ -57,15 +57,27 @@ def formatHeader (projectName : String) : String :=
   s!"Tool: TAIL v{tailVersion}\n" ++
   s!"{divider}\n"
 
-/-- Format trust tier summary (strict Kim Morrison standard - only 2 tiers) -/
+/-- Format trust tier summary -/
 def formatTierSummary (stats : ProjectStats) : String :=
-  let header := "\nTRUST TIER SUMMARY (STRICT KIM MORRISON STANDARD)\n" ++ thinDivider ++ "\n"
+  let hasDefinitions := stats.definitions.lineCount > 0
+  let hasProofs := stats.proofs.lineCount > 0
 
-  -- MainTheorem (requires human review)
-  let mainThmLine := s!"  {padRight "MainTheorem.lean" 40}{formatNumber stats.mainTheorem.lineCount} lines  [HUMAN REVIEW]\n"
+  let modeLabel := if hasDefinitions then "EXTENDED KIM MORRISON STANDARD" else "STRICT KIM MORRISON STANDARD"
+  let header := s!"\nTRUST TIER SUMMARY ({modeLabel})\n" ++ thinDivider ++ "\n"
 
-  -- ProofOfMainTheorem (machine verified)
-  let proofLine := s!"  {padRight "ProofOfMainTheorem.lean" 40}{formatNumber stats.proofOfMainTheorem.lineCount} lines  [MACHINE VERIFIED]\n"
+  -- Human Review Tier
+  let humanReviewHeader := "  [HUMAN REVIEW]\n"
+  let mainThmLine := s!"    MainTheorem.lean                            {formatNumber stats.mainTheorem.lineCount} lines\n"
+  let defsLine := if hasDefinitions then
+    s!"    Definitions/ ({stats.definitions.fileCount} files)                     {formatNumber stats.definitions.lineCount} lines\n"
+  else ""
+
+  -- Machine Verified Tier
+  let machineHeader := "  [MACHINE VERIFIED]\n"
+  let proofLine := s!"    ProofOfMainTheorem.lean                     {formatNumber stats.proofOfMainTheorem.lineCount} lines\n"
+  let proofsLine := if hasProofs then
+    s!"    Proofs/ ({stats.proofs.fileCount} files)                         {formatNumber stats.proofs.lineCount} lines\n"
+  else ""
 
   let separator := thinDivider ++ "\n"
 
@@ -74,11 +86,17 @@ def formatTierSummary (stats : ProjectStats) : String :=
   let review := stats.reviewBurden
   let pct := if total > 0 then (review * 100) / total else 0
 
-  let reviewLine := s!"  REVIEW BURDEN: {formatNumber review} lines"
-  let reviewDesc := " (MainTheorem.lean only)\n"
+  let reviewDesc := if hasDefinitions then
+    s!"  REVIEW BURDEN: {formatNumber review} lines (MainTheorem.lean + Definitions/)\n"
+  else
+    s!"  REVIEW BURDEN: {formatNumber review} lines (MainTheorem.lean only)\n"
+
   let totalLine := s!"  TOTAL: {formatNumber total} lines ({pct}% requires review)\n"
 
-  header ++ mainThmLine ++ proofLine ++ separator ++ reviewLine ++ reviewDesc ++ totalLine
+  header ++
+  humanReviewHeader ++ mainThmLine ++ defsLine ++
+  machineHeader ++ proofLine ++ proofsLine ++
+  separator ++ reviewDesc ++ totalLine
 
 /-- Format a single check result -/
 def formatCheck (result : CheckResult) : String :=
@@ -134,16 +152,20 @@ private def reviewPercentage (stats : ProjectStats) : Float :=
 def formatReportJson (report : VerificationReport) : String :=
   let result := if report.allPassed then "VERIFIED" else "FAILED"
   let pct := reviewPercentage report.stats
+  let hasDefinitions := report.stats.definitions.lineCount > 0
+  let standardName := if hasDefinitions then "Kim Morrison Extended" else "Kim Morrison Strict"
 
-  -- Build enhanced JSON structure (strict Kim Morrison standard - 2 tiers)
+  -- Build enhanced JSON structure
   let json := Json.mkObj [
     ("version", toJson tailVersion),
-    ("standard", toJson "Kim Morrison Strict"),
+    ("standard", toJson standardName),
     ("project", toJson report.projectName),
     ("result", toJson result),
     ("stats", Json.mkObj [
       ("main_theorem", toJson report.stats.mainTheorem),
+      ("definitions", toJson report.stats.definitions),
       ("proof_of_main_theorem", toJson report.stats.proofOfMainTheorem),
+      ("proofs", toJson report.stats.proofs),
       ("total_lines", toJson report.stats.totalLines),
       ("review_burden", toJson report.stats.reviewBurden),
       ("review_percentage", toJson pct)

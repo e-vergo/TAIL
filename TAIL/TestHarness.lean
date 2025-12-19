@@ -67,17 +67,25 @@ structure TestResult where
 
 /-- Create ResolvedConfig for a test fixture.
     Handles nested directory paths like "TestFixtures/Structure/MissingStatement" -/
-def makeFixtureConfig (fixtureDir : String) : IO ResolvedConfig := do
+def makeFixtureConfig (fixtureDir : String) (mode : VerificationMode := .default) : IO ResolvedConfig := do
   let root ← IO.currentDir
   let fixturePath := root / fixtureDir
   -- Convert path separators to dots for module name
   let modulePrefix := fixtureDir.replace "/" "."
+  -- Check for optional folders
+  let definitionsPath := fixturePath / definitionsFolder
+  let definitionsExists ← definitionsPath.pathExists
+  let proofsPath := fixturePath / proofsFolder
+  let proofsExists ← proofsPath.pathExists
   return {
+    mode := mode
     projectPrefix := modulePrefix
     projectRoot := root
     sourcePath := fixturePath
     mainTheoremPath := fixturePath / "MainTheorem.lean"
     proofOfMainTheoremPath := fixturePath / "ProofOfMainTheorem.lean"
+    definitionsPath := if definitionsExists then some definitionsPath else none
+    proofsPath := if proofsExists then some proofsPath else none
   }
 
 /-- Run the appropriate check for the given CheckType -/
