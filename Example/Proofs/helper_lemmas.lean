@@ -1,8 +1,12 @@
 module
 
-import Mathlib.Tactic
+public import Mathlib.Tactic
 
 open Finset
+
+namespace Example
+
+public section
 
 /-- Product of consecutive naturals is even -/
 lemma two_dvd_mul_succ (n : ℕ) : 2 ∣ n * (n + 1) := by
@@ -51,3 +55,7 @@ lemma sum_cubes_eq (n : ℕ) :
   | succ n ih =>
     rw [sum_range_succ, ih]
     exact sum_cubes_step n
+
+end
+
+end Example

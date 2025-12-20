@@ -8,7 +8,7 @@ This plan defines the two verification modes for TAIL, specifying exactly what d
 
 ## File Structure
 
-### Strict Mode (Original Kim Morrison Standard)
+### Strict Mode (Original TAIL Standard)
 
 ```
 ProjectName/
@@ -58,7 +58,7 @@ The project name is auto-detected from `lakefile.lean`.
 | | | Any `axiom` |
 | | | Any `opaque` |
 
-**Note:** Strict mode enforces the original Kim Morrison proposal: MainTheorem.lean contains *only* `StatementOfTheorem`.
+**Note:** Strict mode enforces the original TAIL proposal: MainTheorem.lean contains *only* `StatementOfTheorem`.
 
 ### ProofOfMainTheorem.lean
 

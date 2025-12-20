@@ -15,7 +15,7 @@ Verify that required declarations exist with correct types:
 - `mainTheorem : StatementOfTheorem`
 - MainTheorem.lean imports only from Mathlib (no project imports)
 
-This is the core semantic verification per the Kim Morrison Standard.
+This is the core semantic verification per the TAIL Standard.
 -/
 
 namespace TAIL.Checks
@@ -24,7 +24,7 @@ open Lean Meta
 
 /-! ## Import Verification -/
 
-/-- Allowed import prefixes for MainTheorem.lean (Kim Morrison Standard) -/
+/-- Allowed import prefixes for MainTheorem.lean (TAIL Standard) -/
 def allowedImportPrefixes : List String :=
   ["Mathlib", "Init", "Std", "Lean", "Qq", "Aesop", "ProofWidgets", "Batteries"]
 
@@ -94,7 +94,7 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
       then "In strict mode, MainTheorem.lean must only import from Mathlib"
       else "MainTheorem.lean can only import from Mathlib or Definitions/"
     return CheckResult.fail "Structure"
-      "MainTheorem.lean has disallowed imports (Kim Morrison Standard violation)"
+      "MainTheorem.lean has disallowed imports (TAIL Standard violation)"
       ([modeNote] ++ importViolations)
 
   let importMsg := if resolved.mode == .strict

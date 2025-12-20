@@ -66,9 +66,9 @@ def allTestCases : List TestCase := [
     expectFailure := true
     expectedMessage := "invalid" },
 
-  -- MainTheoremPurity violations
-  { fixtureDir := "TestFixtures/ViolationDetection/MainTheoremPurity/TheoremInStatement"
-    checkType := .mainTheoremPurity
+  -- MainTheoremIsIsolated violations
+  { fixtureDir := "TestFixtures/ViolationDetection/MainTheoremIsIsolated/TheoremInStatement"
+    checkType := .mainTheoremIsIsolated
     expectFailure := true
     expectedMessage := "disallowed" },
 
@@ -156,13 +156,13 @@ def allTestCases : List TestCase := [
     expectFailure := false
     expectedMessage := none },
 
-  -- MainTheoremPurity (valid fixtures)
-  { fixtureDir := "TestFixtures/FalsePositivePrevention/MainTheoremPurity/OnlyDefs"
-    checkType := .mainTheoremPurity
+  -- MainTheoremIsIsolated (valid fixtures)
+  { fixtureDir := "TestFixtures/FalsePositivePrevention/MainTheoremIsIsolated/OnlyDefs"
+    checkType := .mainTheoremIsIsolated
     expectFailure := false
     expectedMessage := none },
-  { fixtureDir := "TestFixtures/FalsePositivePrevention/MainTheoremPurity/MultipleHelperDefs"
-    checkType := .mainTheoremPurity
+  { fixtureDir := "TestFixtures/FalsePositivePrevention/MainTheoremIsIsolated/MultipleHelperDefs"
+    checkType := .mainTheoremIsIsolated
     expectFailure := false
     expectedMessage := none },
 

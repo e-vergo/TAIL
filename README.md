@@ -4,9 +4,9 @@
 
 A verification tool for Lean 4 projects that aims to reduce the review burden for AI generated mathematical proofs
 
-## The Kim Morrison Standard
+## The TAIL Standard
 
-[Kim Morrison proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.20proofs/near/556956052) a strict solution:
+[TAIL proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.20proofs/near/556956052) a strict solution:
 
 > Projects "don't count" unless:
 > - They contain a file `MainTheorem.lean`, which has **no imports outside of Mathlib**, and contains the main result as `def StatementOfTheorem : Prop := ...`
@@ -14,7 +14,7 @@ A verification tool for Lean 4 projects that aims to reduce the review burden fo
 
 TAIL supports two modes:
 
-### Strict Mode (Original Kim Morrison Standard)
+### Strict Mode (Original TAIL Standard)
 - `MainTheorem.lean` contains only `ProjectName.StatementOfTheorem`
 - No `Definitions/` folder allowed
 - Run with `--strict` flag
@@ -34,7 +34,7 @@ With the Lean 4.27+ module system, `ProofOfMainTheorem.lean` uses **private impo
 
 ### Required Structure
 
-All names are hardcoded per the Kim Morrison Standard:
+All names are hardcoded per the TAIL Standard:
 - `MainTheorem.lean` - statement file
 - `ProofOfMainTheorem.lean` - proof file
 - `Definitions/` - supporting types (default mode only)
@@ -127,7 +127,7 @@ lake build
 # Run from the target project's root directory (default mode)
 lake exe tailverify
 
-# Strict mode (original Kim Morrison Standard - no Definitions/ allowed)
+# Strict mode (original TAIL Standard - no Definitions/ allowed)
 lake exe tailverify --strict
 
 # Or specify the project path
@@ -143,7 +143,7 @@ lake exe tailverify --output report.txt
 ### Creating a New Project
 
 ```bash
-# Generate a Kim Morrison Standard project structure
+# Generate a TAIL Standard project structure
 lake exe tailscaffold MyTheorem
 cd MyTheorem
 lake update
@@ -239,7 +239,7 @@ No configuration file needed - project prefix is auto-detected from `lakefile.le
 
 ## Reference
 
-- [Kim Morrison's original proposal](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/with/558843568)
+- [TAIL's original proposal](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/with/558843568)
 - [Lean 4.20.0 Module System](https://lean-lang.org/doc/reference/latest/releases/v4.20.0/)
 - [lean4checker](https://github.com/leanprover/lean4checker) - Kernel verification
 - [Lean 4](https://leanprover.github.io/)

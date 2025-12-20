@@ -10,7 +10,7 @@ import TAIL.Environment
 /-!
 # Import Discipline Check (Environment-Based)
 
-Verify imports follow the strict Kim Morrison Standard using environment introspection.
+Verify imports follow the strict TAIL Standard using environment introspection.
 
 Instead of parsing text for `public import`/`module` keywords, we verify the
 **actual effect** by checking what declarations are visible in the loaded environment.
@@ -38,6 +38,7 @@ def checkImports (resolved : ResolvedConfig) : MetaM CheckResult := do
     resolved.projectPrefix
     resolved.statementName'
     resolved.theoremName'
+    resolved.mode
 
   return visibilityResult
 

@@ -8,7 +8,7 @@ import Lean
 /-!
 # TAIL Types
 
-Core types for Kim Morrison Standard verification.
+Core types for TAIL Standard verification.
 -/
 
 namespace TAIL
@@ -17,10 +17,10 @@ open Lean
 
 /-! ## Verification Mode -/
 
-/-- Verification modes for the Kim Morrison Standard.
+/-- Verification modes for the TAIL Standard.
     Strict enforces the original proposal; Default allows Definitions/ folder. -/
 inductive VerificationMode where
-  /-- Original Kim Morrison Standard: MainTheorem.lean contains only StatementOfTheorem -/
+  /-- Original TAIL Standard: MainTheorem.lean contains only StatementOfTheorem -/
   | strict
   /-- Extended standard: allows Definitions/ folder for supporting types -/
   | default
@@ -33,7 +33,7 @@ instance : ToString VerificationMode where
 
 /-! ## Trust Levels -/
 
-/-- Trust tiers for the Kim Morrison Standard.
+/-- Trust tiers for the TAIL Standard.
     Files are classified as either requiring human review or machine-verified. -/
 inductive TrustLevel where
   /-- Statement file: Mathlib-only imports, contains StatementOfTheorem def -/

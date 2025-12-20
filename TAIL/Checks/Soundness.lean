@@ -9,7 +9,7 @@ import TAIL.Config
 /-!
 # Soundness Check
 
-Comprehensive soundness verification for Kim Morrison Standard compliance.
+Comprehensive soundness verification for TAIL Standard compliance.
 
 ## Checks Performed
 
@@ -147,7 +147,7 @@ def checkSoundness (resolved : ResolvedConfig) : MetaM CheckResult := do
   let mut nativeDecideUsages : List Name := []
   let mut trivialTheorems : List Name := []
 
-  -- The standard Kim Morrison names (not prefixed) - must always check these
+  -- The standard TAIL names (not prefixed) - must always check these
   let mainTheoremName := resolved.theoremName'
   let statementName := resolved.statementName'
 
@@ -155,7 +155,7 @@ def checkSoundness (resolved : ResolvedConfig) : MetaM CheckResult := do
   let privatePrefix := s!"_private.{projectPrefix}"
   for (name, info) in env.constants.toList do
     let nameStr := name.toString
-    -- Check project-prefixed declarations OR the standard Kim Morrison names
+    -- Check project-prefixed declarations OR the standard TAIL names
     let isProjectDecl := nameStr.startsWith projectPrefix || nameStr.startsWith privatePrefix
     let isStandardKMDecl := name == mainTheoremName || name == statementName
     if !(isProjectDecl || isStandardKMDecl) then

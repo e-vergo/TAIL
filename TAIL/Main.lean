@@ -11,14 +11,15 @@ import TAIL.Checks.Structure
 import TAIL.Checks.Soundness
 import TAIL.Checks.ProofMinimality
 import TAIL.Checks.Imports
-import TAIL.Checks.MainTheoremPurity
+import TAIL.Checks.MainTheoremIsIsolated
+import TAIL.Checks.ProofsPurity
 import TAIL.Checks.DefinitionsPurity
 import TAIL.Checks.Lean4Checker
 
 /-!
 # TAIL Main
 
-CLI entry point and orchestration for Kim Morrison Standard verification.
+CLI entry point and orchestration for TAIL Standard verification.
 
 ## Usage
 
@@ -87,11 +88,12 @@ def runMetaChecks (resolved : ResolvedConfig) : MetaM (List CheckResult) := do
   let structure_ ← Checks.checkStructure resolved
   let soundness ← Checks.checkSoundness resolved
   let proofMinimality ← Checks.checkProofMinimality resolved
-  let statementPurity ← Checks.checkStatementPurity resolved
+  let mainTheoremIsolation ← Checks.checkMainTheoremIsIsolated resolved
   let definitionsPurity ← Checks.checkDefinitionsPurity resolved
+  let proofsPurity ← Checks.checkProofsPurity resolved
   let imports ← Checks.checkImports resolved  -- Now MetaM-based (re-import test)
 
-  return [structure_, soundness, proofMinimality, statementPurity, definitionsPurity, imports]
+  return [structure_, soundness, proofMinimality, mainTheoremIsolation, definitionsPurity, proofsPurity, imports]
 
 /-- Run all checks and build report -/
 def runVerification (resolved : ResolvedConfig) : MetaM VerificationReport := do
@@ -156,13 +158,13 @@ def parseArgs (args : List String) : IO CLIArgs := do
     else if arg == "--help" || arg == "-h" then
       IO.println "Usage: lake exe tailverify [directory] [--strict] [--prefix NAME] [--report] [--output FILE]"
       IO.println ""
-      IO.println "Verify a Lean project follows the Kim Morrison Standard."
+      IO.println "Verify a Lean project follows the TAIL Standard."
       IO.println ""
       IO.println "Arguments:"
       IO.println "  directory    Project root (default: current directory)"
       IO.println ""
       IO.println "Options:"
-      IO.println "  --strict     Strict mode: original Kim Morrison Standard (no Definitions/ folder)"
+      IO.println "  --strict     Strict mode: original TAIL Standard (no Definitions/ folder)"
       IO.println "  -p, --prefix Override project prefix (default: auto-detect from lakefile)"
       IO.println "  --json       Output in JSON format"
       IO.println "  --text       Output in text format (default)"

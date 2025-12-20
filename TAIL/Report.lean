@@ -52,7 +52,7 @@ private def getTimestamp : IO String := do
 /-- Format the header -/
 def formatHeader (projectName : String) : String :=
   s!"{divider}\n" ++
-  s!"KIM MORRISON STANDARD COMPLIANCE REPORT\n" ++
+  s!"TAIL STANDARD COMPLIANCE REPORT\n" ++
   s!"Project: {projectName}\n" ++
   s!"Tool: TAIL v{tailVersion}\n" ++
   s!"{divider}\n"
@@ -62,7 +62,7 @@ def formatTierSummary (stats : ProjectStats) : String :=
   let hasDefinitions := stats.definitions.lineCount > 0
   let hasProofs := stats.proofs.lineCount > 0
 
-  let modeLabel := if hasDefinitions then "EXTENDED KIM MORRISON STANDARD" else "STRICT KIM MORRISON STANDARD"
+  let modeLabel := if hasDefinitions then "EXTENDED TAIL STANDARD" else "STRICT TAIL STANDARD"
   let header := s!"\nTRUST TIER SUMMARY ({modeLabel})\n" ++ thinDivider ++ "\n"
 
   -- Human Review Tier
@@ -121,7 +121,7 @@ def formatResult (allPassed : Bool) : String :=
   let result := if allPassed then
     "\n" ++ divider ++ "\n" ++
     "RESULT: PROJECT MEETS TEMPLATE EXPECTATIONS\n" ++
-    "\nThis project meets the Kim Morrison Standard for AI-assisted formal proofs.\n" ++
+    "\nThis project meets the TAIL Standard for AI-generated formal proofs.\n" ++
     "A human reviewer only needs to verify MainTheorem.lean to trust the result.\n" ++
     divider ++ "\n"
   else
@@ -153,7 +153,7 @@ def formatReportJson (report : VerificationReport) : String :=
   let result := if report.allPassed then "VERIFIED" else "FAILED"
   let pct := reviewPercentage report.stats
   let hasDefinitions := report.stats.definitions.lineCount > 0
-  let standardName := if hasDefinitions then "Kim Morrison Extended" else "Kim Morrison Strict"
+  let standardName := if hasDefinitions then "TAIL Standard (Extended)" else "TAIL Standard (Strict)"
 
   -- Build enhanced JSON structure
   let json := Json.mkObj [

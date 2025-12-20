@@ -7,7 +7,7 @@ Authors: Eric Hearn
 /-!
 # TAIL Scaffold
 
-Generate a new Kim Morrison Standard project structure.
+Generate a new TAIL Standard project structure.
 
 ## Usage
 
@@ -38,7 +38,7 @@ def ensureDir (path : System.FilePath) : IO Unit := do
 def writeFile (path : System.FilePath) (content : String) : IO Unit := do
   IO.FS.writeFile path content
 
-/-- Generate MainTheorem.lean content (imports only Mathlib per Kim Morrison Standard) -/
+/-- Generate MainTheorem.lean content (imports only Mathlib per TAIL Standard) -/
 def mainTheoremContent (projectName : String) : String :=
 s!"/-
 Copyright (c) 2025. All rights reserved.
@@ -50,7 +50,7 @@ import Mathlib.Tactic
 # Main Theorem Statement
 
 This file contains the statement of the main theorem to be proven.
-Per the Kim Morrison Standard, this file:
+Per the TAIL Standard, this file:
 - Imports ONLY from Mathlib (no project imports)
 - Contains only definitions, no proofs
 - Must be fully understood by a human reviewer
@@ -88,7 +88,7 @@ import {projectName}.Proofs.Support -- Private (not re-exported)
 # Proof of Main Theorem
 
 This file contains exactly one theorem: the proof of the main theorem.
-Per the Kim Morrison Standard:
+Per the TAIL Standard:
 - Uses `module` keyword to enable private imports
 - All project imports are private (not re-exported)
 - Only Mathlib imports are public
@@ -168,7 +168,7 @@ def scaffold (projectName : String) : IO Unit := do
   if projectExists then
     throw (IO.userError s!"Directory '{projectName}' already exists")
 
-  IO.println s!"Creating Kim Morrison Standard project: {projectName}"
+  IO.println s!"Creating TAIL Standard project: {projectName}"
   IO.println ""
 
   -- Create directories
@@ -218,7 +218,7 @@ def main (args : List String) : IO UInt32 := do
     if projectName.startsWith "-" then
       IO.eprintln "Usage: lake exe tailscaffold <ProjectName>"
       IO.eprintln ""
-      IO.eprintln "Creates a new Kim Morrison Standard project structure."
+      IO.eprintln "Creates a new TAIL Standard project structure."
       return 1
     try
       scaffold projectName
@@ -229,9 +229,9 @@ def main (args : List String) : IO UInt32 := do
   | _ =>
     IO.eprintln "Usage: lake exe tailscaffold <ProjectName>"
     IO.eprintln ""
-    IO.eprintln "Creates a new Kim Morrison Standard project structure."
+    IO.eprintln "Creates a new TAIL Standard project structure."
     IO.eprintln ""
-    IO.eprintln "The Kim Morrison Standard requires:"
+    IO.eprintln "The TAIL Standard requires:"
     IO.eprintln "  - MainTheorem.lean imports ONLY from Mathlib"
     IO.eprintln "  - ProofOfMainTheorem.lean uses module system for private imports"
     IO.eprintln "  - StatementOfTheorem : Prop defined in MainTheorem"

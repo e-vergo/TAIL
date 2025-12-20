@@ -8,7 +8,7 @@ import TAIL.Config
 import TAIL.Checks.Structure
 import TAIL.Checks.Soundness
 import TAIL.Checks.ProofMinimality
-import TAIL.Checks.MainTheoremPurity
+import TAIL.Checks.MainTheoremIsIsolated
 import TAIL.Checks.Imports
 
 /-!
@@ -34,7 +34,7 @@ inductive CheckType where
   | structure
   | soundness
   | proofMinimality
-  | mainTheoremPurity
+  | mainTheoremIsIsolated
   | moduleVisibility
   deriving DecidableEq, Repr
 
@@ -43,7 +43,7 @@ instance : ToString CheckType where
     | .structure => "Structure"
     | .soundness => "Soundness"
     | .proofMinimality => "ProofMinimality"
-    | .mainTheoremPurity => "MainTheoremPurity"
+    | .mainTheoremIsIsolated => "MainTheoremIsIsolated"
     | .moduleVisibility => "ModuleVisibility"
 
 /-- A test case definition -/
@@ -94,7 +94,7 @@ def runCheck (checkType : CheckType) (resolved : ResolvedConfig) : MetaM CheckRe
   | .structure => Checks.checkStructure resolved
   | .soundness => Checks.checkSoundness resolved
   | .proofMinimality => Checks.checkProofMinimality resolved
-  | .mainTheoremPurity => Checks.checkMainTheoremPurity resolved
+  | .mainTheoremIsIsolated => Checks.checkMainTheoremIsIsolated resolved
   | .moduleVisibility => Checks.checkImports resolved
 
 /-- Run a single test case and return result -/

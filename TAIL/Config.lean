@@ -8,7 +8,7 @@ import TAIL.Types
 /-!
 # TAIL Configuration
 
-Auto-detect project configuration from lakefile.lean with hardcoded Kim Morrison Standard names.
+Auto-detect project configuration from lakefile.lean with hardcoded TAIL Standard names.
 
 No configuration file needed - all names are standardized:
 - MainTheorem.lean, ProofOfMainTheorem.lean
@@ -20,7 +20,7 @@ namespace TAIL
 
 open Lean
 
-/-! ## Hardcoded Kim Morrison Standard Names -/
+/-! ## Hardcoded TAIL Standard Names -/
 
 /-- Standard file name for the theorem statement -/
 def mainTheoremFile : String := "MainTheorem.lean"
@@ -67,12 +67,12 @@ private def parseDottedName (s : String) : Name :=
   s.splitOn "." |>.foldl (fun acc part => acc.str part) Name.anonymous
 
 /-- Fully qualified name for StatementOfTheorem.
-    Per Kim Morrison's suggestion, uses ProjectName.StatementOfTheorem to prevent collisions. -/
+    Per the TAIL standard, uses ProjectName.StatementOfTheorem to prevent collisions. -/
 def ResolvedConfig.statementName' (rc : ResolvedConfig) : Name :=
   parseDottedName s!"{rc.projectPrefix}.{statementBaseName}"
 
 /-- Fully qualified name for mainTheorem.
-    Per Kim Morrison's suggestion, uses ProjectName.mainTheorem to prevent collisions. -/
+    Per the TAIL standard, uses ProjectName.mainTheorem to prevent collisions. -/
 def ResolvedConfig.theoremName' (rc : ResolvedConfig) : Name :=
   parseDottedName s!"{rc.projectPrefix}.{theoremBaseName}"
 
