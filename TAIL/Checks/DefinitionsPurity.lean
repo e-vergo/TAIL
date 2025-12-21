@@ -7,6 +7,7 @@ import TAIL.Types
 import TAIL.Config
 import TAIL.Environment
 import TAIL.Checks.Structure
+import TAIL.Utils
 
 /-!
 # Definitions Purity Check
@@ -25,14 +26,10 @@ namespace TAIL.Checks
 
 open Lean Meta
 
-/-- Allowed import prefixes for Definitions/ files -/
-def definitionsAllowedImportPrefixes : List String :=
-  ["Mathlib", "Init", "Std", "Lean", "Qq", "Aesop", "ProofWidgets", "Batteries"]
-
 /-- Check imports for a Definitions/ module -/
 def checkDefinitionsModuleImports (env : Environment) (moduleName : Name) (resolved : ResolvedConfig) :
     List String × Bool :=
-  match getModuleImports env moduleName with
+  match TAIL.getModuleImports env moduleName with
   | none => (["Could not retrieve imports"], false)
   | some imports =>
     let violations := imports.toList.filterMap fun imp =>
@@ -45,48 +42,19 @@ def checkDefinitionsModuleImports (env : Environment) (moduleName : Name) (resol
           none  -- OK
         else
           some s!"  - {modStr} (only Definitions/ imports allowed)"
-      else if !definitionsAllowedImportPrefixes.any (modStr.startsWith ·) then
+      else if !TAIL.standardLibraryPrefixes.any (modStr.startsWith ·) then
         some s!"  - {modStr} (non-Mathlib import)"
       else
         none
     (violations, violations.isEmpty)
 
-/-- Check if a declaration uses sorry by checking axiom dependencies -/
-private def usagesSorry (env : Environment) (declName : Name) : MetaM Bool := do
-  try
-    let mut visited : Std.HashSet Name := {}
-    let mut toVisit : Array Name := #[declName]
-
-    while h : toVisit.size > 0 do
-      let curr := toVisit[toVisit.size - 1]'(by omega)
-      toVisit := toVisit.pop
-
-      if visited.contains curr then continue
-      visited := visited.insert curr
-
-      let some currInfo := env.find? curr | continue
-
-      match currInfo with
-      | .axiomInfo _ =>
-        if curr == ``sorryAx then return true
-      | .defnInfo val =>
-        let deps := val.value.getUsedConstants
-        toVisit := toVisit ++ deps.filter (!visited.contains ·)
-      | .thmInfo val =>
-        let deps := val.value.getUsedConstants
-        toVisit := toVisit ++ deps.filter (!visited.contains ·)
-      | _ => continue
-
-    return false
-  catch _ =>
-    return false
-
 /-- Check declarations in a Definitions/ module -/
-def checkDefinitionsModuleDeclarations (env : Environment) (moduleName : Name) : MetaM (List String × Bool) := do
-  let decls := TAIL.getModuleDeclarations env moduleName
+def checkDefinitionsModuleDeclarations (env : Environment) (moduleName : Name)
+    (index : Option TAIL.EnvironmentIndex := none) : MetaM (List String × Bool) := do
+  let decls := TAIL.getModuleDeclarations env moduleName index
   let userDecls := decls.filter (!TAIL.isInternalName ·)
 
-  let mut violations : List String := []
+  let mut violationsArray : Array String := #[]
 
   for decl in userDecls do
     match env.find? decl with
@@ -98,22 +66,22 @@ def checkDefinitionsModuleDeclarations (env : Environment) (moduleName : Name) :
       else if TAIL.isStructureFieldTheorem env decl then
         continue
       else
-        violations := violations ++ [s!"  - theorem {decl} (theorems not allowed in Definitions/)"]
+        violationsArray := violationsArray.push s!"  - theorem {decl} (theorems not allowed in Definitions/)"
     | some (.axiomInfo _) =>
-      violations := violations ++ [s!"  - axiom {decl} (axioms not allowed)"]
+      violationsArray := violationsArray.push s!"  - axiom {decl} (axioms not allowed)"
     | some (.opaqueInfo _) =>
-      violations := violations ++ [s!"  - opaque {decl} (opaque not allowed)"]
+      violationsArray := violationsArray.push s!"  - opaque {decl} (opaque not allowed)"
     | some (.defnInfo _) | some (.inductInfo _) =>
       -- Check for sorry usage
-      let usesSorry ← usagesSorry env decl
+      let usesSorry ← TAIL.usagesSorry env decl
       if usesSorry then
-        violations := violations ++ [s!"  - {decl} uses sorry (not allowed in Definitions/)"]
+        violationsArray := violationsArray.push s!"  - {decl} uses sorry (not allowed in Definitions/)"
     | _ => continue  -- ctorInfo, recInfo, quotInfo are fine
 
-  return (violations, violations.isEmpty)
+  return (violationsArray.toList, violationsArray.isEmpty)
 
 /-- Check that all Definitions/ files follow the rules -/
-def checkDefinitionsPurity (resolved : ResolvedConfig) : MetaM CheckResult := do
+def checkDefinitionsPurity (resolved : ResolvedConfig) (index : Option TAIL.EnvironmentIndex := none) : MetaM CheckResult := do
   -- Skip if no Definitions/ folder or in strict mode
   if resolved.mode == .strict then
     return CheckResult.pass "Definitions Purity"
@@ -134,7 +102,7 @@ def checkDefinitionsPurity (resolved : ResolvedConfig) : MetaM CheckResult := do
     return CheckResult.pass "Definitions Purity"
       "No modules found in Definitions/ folder"
 
-  let mut allViolations : List String := []
+  let mut allViolationsArray : Array String := #[]
   let mut moduleCount := 0
 
   for modName in defModules do
@@ -143,18 +111,20 @@ def checkDefinitionsPurity (resolved : ResolvedConfig) : MetaM CheckResult := do
     -- Check imports
     let (importViolations, importsOk) := checkDefinitionsModuleImports env modName resolved
     if !importsOk then
-      allViolations := allViolations ++ [s!"Import violations in {modName}:"] ++ importViolations
+      allViolationsArray := allViolationsArray.push s!"Import violations in {modName}:"
+      allViolationsArray := allViolationsArray ++ importViolations.toArray
 
     -- Check declarations (now in MetaM due to sorry checking)
-    let (declViolations, declsOk) ← checkDefinitionsModuleDeclarations env modName
+    let (declViolations, declsOk) ← checkDefinitionsModuleDeclarations env modName index
     if !declsOk then
-      allViolations := allViolations ++ [s!"Declaration violations in {modName}:"] ++ declViolations
+      allViolationsArray := allViolationsArray.push s!"Declaration violations in {modName}:"
+      allViolationsArray := allViolationsArray ++ declViolations.toArray
 
-  if allViolations.isEmpty then
+  if allViolationsArray.isEmpty then
     return CheckResult.pass "Definitions Purity"
       s!"All {moduleCount} Definitions/ modules are valid"
   else
     return CheckResult.fail "Definitions Purity"
-      "Definitions/ folder contains disallowed content" allViolations
+      "Definitions/ folder contains disallowed content" allViolationsArray.toList
 
 end TAIL.Checks

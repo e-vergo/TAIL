@@ -6,6 +6,7 @@ Authors: Eric Hearn
 import TAIL.Types
 import TAIL.Config
 import TAIL.Environment
+import TAIL.Utils
 
 /-!
 # Structure Check
@@ -24,27 +25,12 @@ open Lean Meta
 
 /-! ## Import Verification -/
 
-/-- Allowed import prefixes for MainTheorem.lean (TAIL Standard) -/
-def allowedImportPrefixes : List String :=
-  ["Mathlib", "Init", "Std", "Lean", "Qq", "Aesop", "ProofWidgets", "Batteries"]
-
-/-- Check if an import is from an allowed source -/
-def isAllowedImport (moduleName : Name) : Bool :=
-  let nameStr := moduleName.toString
-  allowedImportPrefixes.any (nameStr.startsWith ·)
-
-/-- Get imports for a specific module from the environment -/
-def getModuleImports (env : Environment) (moduleName : Name) : Option (Array Import) := do
-  let idx ← env.getModuleIdx? moduleName
-  let moduleData := env.header.moduleData[idx.toNat]?
-  return moduleData.map (·.imports) |>.getD #[]
-
 /-- Check that MainTheorem.lean only imports from allowed sources.
     In strict mode: only Mathlib allowed
     In default mode: Mathlib and Definitions/ folder allowed -/
 def checkMainTheoremImports (env : Environment) (mainModule : Name) (resolved : ResolvedConfig) :
     List String × Bool := Id.run do
-  let some imports := getModuleImports env mainModule
+  let some imports := TAIL.getModuleImports env mainModule
     | (["Could not retrieve imports for MainTheorem module"], false)
 
   let mut violations : List String := []
@@ -62,7 +48,7 @@ def checkMainTheoremImports (env : Environment) (mainModule : Name) (resolved : 
       else
         -- Project import not from Definitions/ (or we're in strict mode)
         violations := violations ++ [s!"  - {modStr} (project import not allowed)"]
-    else if !isAllowedImport modName then
+    else if !TAIL.isStandardLibraryImport modName then
       violations := violations ++ [s!"  - {modStr} (non-Mathlib import)"]
 
   (violations, violations.isEmpty)
@@ -102,12 +88,20 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
     else "MainTheorem.lean imports only from Mathlib/Definitions"
   details := details ++ [importMsg]
 
-  -- Check 1: StatementOfTheorem exists
+  -- Check 1: StatementOfTheorem exists and is in correct namespace
   let statementInfo ← match env.find? statementName with
     | some info => pure info
     | none =>
       return CheckResult.fail "Structure"
-        s!"'{statementName}' not found" []
+        s!"'{statementName}' not found"
+        [s!"Expected declaration at fully qualified name: {statementName}",
+         "Per TAIL Standard: StatementOfTheorem must be in ProjectName.StatementOfTheorem namespace"]
+
+  -- Verify namespace: The fact that env.find? succeeded with the fully qualified name
+  -- confirms the declaration is at the expected namespace. This is by design - Lean
+  -- environment lookups are exact, so finding it at 'ProjectName.StatementOfTheorem'
+  -- proves it's in that namespace.
+  details := details ++ [s!"Namespace verified: {statementName}"]
 
   -- Check 2: StatementOfTheorem : Prop
   -- The type of a definition `def X : Prop := ...` is Prop
@@ -134,7 +128,7 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
 
   details := details ++ [s!"{statementName} : Prop [verified {equalityMethod}]"]
 
-  -- Check 3: mainTheorem exists and is a theorem
+  -- Check 3: mainTheorem exists, is a theorem, and is in correct namespace
   let theoremInfo ← match env.find? theoremName with
     | some (.thmInfo tinfo) => pure tinfo
     | some info =>
@@ -143,7 +137,12 @@ def checkStructure (resolved : ResolvedConfig) : MetaM CheckResult := do
         s!"'{theoremName}' exists but is a {kind}, not a theorem" []
     | none =>
       return CheckResult.fail "Structure"
-        s!"'{theoremName}' not found" []
+        s!"'{theoremName}' not found"
+        [s!"Expected theorem at fully qualified name: {theoremName}",
+         "Per TAIL Standard: mainTheorem must be in ProjectName.mainTheorem namespace"]
+
+  -- Namespace is verified by successful lookup at fully qualified name
+  details := details ++ [s!"Namespace verified: {theoremName}"]
 
   -- Check 4: mainTheorem : StatementOfTheorem
   -- The type of the theorem should be exactly the statement

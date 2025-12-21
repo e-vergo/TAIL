@@ -10,6 +10,10 @@ import TAIL.Checks.Soundness
 import TAIL.Checks.ProofMinimality
 import TAIL.Checks.MainTheoremIsIsolated
 import TAIL.Checks.Imports
+import TAIL.Checks.ProofsPurity
+import TAIL.Checks.DefinitionsPurity
+import TAIL.Environment
+import TAIL.Utils
 
 /-!
 # TAIL Test Harness
@@ -20,10 +24,6 @@ Test infrastructure for verifying that TAIL checks correctly detect violations.
 namespace TAIL.Test
 
 open Lean Meta
-
-/-- Check if a string contains a substring -/
-def containsSubstr (s : String) (sub : String) : Bool :=
-  (s.splitOn sub).length > 1
 
 /-- Repeat a string n times -/
 def repeatStr (s : String) (n : Nat) : String :=
@@ -36,6 +36,8 @@ inductive CheckType where
   | proofMinimality
   | mainTheoremIsIsolated
   | moduleVisibility
+  | proofsPurity
+  | definitionsPurity
   deriving DecidableEq, Repr
 
 instance : ToString CheckType where
@@ -45,6 +47,8 @@ instance : ToString CheckType where
     | .proofMinimality => "ProofMinimality"
     | .mainTheoremIsIsolated => "MainTheoremIsIsolated"
     | .moduleVisibility => "ModuleVisibility"
+    | .proofsPurity => "ProofsPurity"
+    | .definitionsPurity => "DefinitionsPurity"
 
 /-- A test case definition -/
 structure TestCase where
@@ -90,12 +94,18 @@ def makeFixtureConfig (fixtureDir : String) (mode : VerificationMode := .default
 
 /-- Run the appropriate check for the given CheckType -/
 def runCheck (checkType : CheckType) (resolved : ResolvedConfig) : MetaM CheckResult := do
+  -- Build environment index once for shared use across checks
+  let env ← getEnv
+  let index := TAIL.buildEnvironmentIndex env resolved.projectPrefix
+
   match checkType with
   | .structure => Checks.checkStructure resolved
-  | .soundness => Checks.checkSoundness resolved
-  | .proofMinimality => Checks.checkProofMinimality resolved
-  | .mainTheoremIsIsolated => Checks.checkMainTheoremIsIsolated resolved
-  | .moduleVisibility => Checks.checkImports resolved
+  | .soundness => Checks.checkSoundness resolved index
+  | .proofMinimality => Checks.checkProofMinimality resolved index
+  | .mainTheoremIsIsolated => Checks.checkMainTheoremIsIsolated resolved index
+  | .moduleVisibility => Checks.checkImports resolved index
+  | .proofsPurity => Checks.checkProofsPurity resolved index
+  | .definitionsPurity => Checks.checkDefinitionsPurity resolved index
 
 /-- Run a single test case and return result -/
 def runTestCase (tc : TestCase) : IO TestResult := do
@@ -123,7 +133,7 @@ def runTestCase (tc : TestCase) : IO TestResult := do
         -- Check passed - the check correctly detected the violation
         match tc.expectedMessage with
         | some expected =>
-          if containsSubstr checkResult.message expected then
+          if TAIL.containsSubstr checkResult.message expected then
             return { testCase := tc, passed := true, message := "Check correctly failed with expected message" }
           else
             return { testCase := tc, passed := false,

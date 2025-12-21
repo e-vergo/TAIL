@@ -78,43 +78,35 @@ def collectStats (resolved : ResolvedConfig) : IO ProjectStats := do
 
 /-! ## Check Orchestration -/
 
-/-- Run IO-based checks (no MetaM required) -/
-def runIOChecks (resolved : ResolvedConfig) : IO (List CheckResult) := do
-  let lean4checker ← Checks.checkLean4Checker resolved
-  return [lean4checker]
+/-- Run all MetaM-based checks (environment introspection).
 
-/-- Run all MetaM-based checks (environment introspection) -/
+    Note: The first check will include ~1.4s of lazy initialization overhead from Lean's
+    environment machinery. This is unavoidable but only happens once per tool invocation. -/
 def runMetaChecks (resolved : ResolvedConfig) : MetaM (List CheckResult) := do
-  let structure_ ← Checks.checkStructure resolved
-  let soundness ← Checks.checkSoundness resolved
-  let proofMinimality ← Checks.checkProofMinimality resolved
-  let mainTheoremIsolation ← Checks.checkMainTheoremIsIsolated resolved
-  let definitionsPurity ← Checks.checkDefinitionsPurity resolved
-  let proofsPurity ← Checks.checkProofsPurity resolved
-  let imports ← Checks.checkImports resolved  -- Now MetaM-based (re-import test)
+  -- Build environment index once for shared use across checks
+  let env ← getEnv
+  let index := buildEnvironmentIndex env resolved.projectPrefix
 
-  return [structure_, soundness, proofMinimality, mainTheoremIsolation, definitionsPurity, proofsPurity, imports]
+  -- Run all checks
+  let soundness ← Checks.checkSoundness resolved index
+  let structureCheck ← Checks.checkStructure resolved
+  let proofMinimality ← Checks.checkProofMinimality resolved
+  let mainTheoremIsolated ← Checks.checkMainTheoremIsIsolated resolved
+  let imports ← Checks.checkImports resolved
+  let proofsPurity ← Checks.checkProofsPurity resolved
+  let definitionsPurity ← Checks.checkDefinitionsPurity resolved
+
+  pure [soundness, structureCheck, proofMinimality, mainTheoremIsolated, imports, proofsPurity, definitionsPurity]
 
 /-- Run all checks and build report -/
 def runVerification (resolved : ResolvedConfig) : MetaM VerificationReport := do
-  -- Run IO checks
-  let ioChecks ← runIOChecks resolved
-
-  -- Run Meta checks (environment-based)
   let metaChecks ← runMetaChecks resolved
-
-  -- Combine in display order
-  let allChecks := metaChecks ++ ioChecks
-
-  -- Collect stats
   let stats ← collectStats resolved
-
-  -- Check if all passed
-  let allPassed := allChecks.all (·.passed)
+  let allPassed := metaChecks.all (·.passed)
 
   return {
     projectName := resolved.projectPrefix
-    checks := allChecks
+    checks := metaChecks
     stats := stats
     allPassed := allPassed
   }

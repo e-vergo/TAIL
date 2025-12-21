@@ -197,26 +197,16 @@ def resolveFromDirectory (projectRoot : System.FilePath) (mode : VerificationMod
 /-- Determine trust level for a file path. -/
 def getTrustLevel (resolved : ResolvedConfig) (path : System.FilePath) : TrustLevel :=
   let pathStr := path.toString
+  -- Check exact matches first
   if pathStr == resolved.mainTheoremPath.toString then
     TrustLevel.MainTheorem
   else if pathStr == resolved.proofOfMainTheoremPath.toString then
     TrustLevel.ProofOfMainTheorem
-  else if let some defPath := resolved.definitionsPath then
-    if pathStr.startsWith defPath.toString then
-      TrustLevel.Definitions
-    else if let some proofsPath := resolved.proofsPath then
-      if pathStr.startsWith proofsPath.toString then
-        TrustLevel.Proofs
-      else
-        TrustLevel.Proofs  -- Default to Proofs for other project files
-    else
-      TrustLevel.Proofs
-  else if let some proofsPath := resolved.proofsPath then
-    if pathStr.startsWith proofsPath.toString then
-      TrustLevel.Proofs
-    else
-      TrustLevel.Proofs
+  -- Check directory membership
+  else if resolved.definitionsPath.any (pathStr.startsWith ·.toString) then
+    TrustLevel.Definitions
   else
+    -- All other project files (including Proofs/) are machine-verified
     TrustLevel.Proofs
 
 /-- Determine trust level for a module name. -/

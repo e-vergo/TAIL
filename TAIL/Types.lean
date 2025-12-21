@@ -159,4 +159,19 @@ instance : ToJson VerificationReport where
     ("all_passed", toJson r.allPassed)
   ]
 
+/-! ## Environment Index -/
+
+/-- Pre-computed environment index for efficient check execution.
+    Eliminates redundant env.constants.toList traversals. -/
+structure EnvironmentIndex where
+  /-- All project module names -/
+  projectModules : Array Name
+  /-- Map from module name to declarations in that module -/
+  moduleDeclarations : Std.HashMap Name (Array Name)
+  /-- All project declarations (including module-private) -/
+  projectDeclarations : Array Name
+  /-- User-visible project declarations (filtered from projectDeclarations) -/
+  userDeclarations : Array Name
+  deriving Inhabited
+
 end TAIL

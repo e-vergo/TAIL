@@ -5,6 +5,7 @@ Authors: Eric Hearn
 -/
 import Lean
 import TAIL.Types
+import TAIL.Utils
 
 /-!
 # TAIL Environment Utilities
@@ -30,19 +31,25 @@ def isInModule (env : Environment) (declName : Name) (moduleName : Name) : Bool 
   | some name => name == moduleName
   | none => false
 
-/-- Get all declarations defined in a specific module -/
-def getModuleDeclarations (env : Environment) (moduleName : Name) : List Name := Id.run do
-  let mut result : List Name := []
-  for (name, _) in env.constants.toList do
-    if isInModule env name moduleName then
-      result := name :: result
-  return result.reverse
+/-- Get all declarations defined in a specific module.
+    If an index is provided, uses the pre-built index for efficiency. -/
+def getModuleDeclarations (env : Environment) (moduleName : Name)
+    (index : Option EnvironmentIndex := none) : List Name :=
+  match index with
+  | some idx =>
+    match idx.moduleDeclarations[moduleName]? with
+    | some arr => Array.toList arr
+    | none => []
+  | none =>
+    -- Fallback to direct env query
+    Id.run do
+      let mut result : List Name := []
+      for (name, _) in env.constants.toList do
+        if isInModule env name moduleName then
+          result := name :: result
+      return result.reverse
 
 /-! ## Internal Name Detection -/
-
-/-- Check if a string contains a substring -/
-private def containsSubstr (s : String) (sub : String) : Bool :=
-  (s.splitOn sub).length > 1
 
 /-- Check if a name is an internal/auxiliary declaration -/
 def isInternalName (name : Name) : Bool :=
@@ -102,6 +109,29 @@ def getDeclKind (info : ConstantInfo) : String :=
   | .inductInfo _ => "inductive"
   | .ctorInfo _ => "constructor"
   | .recInfo _ => "recursor"
+
+/-! ## Axiom Dependency Analysis -/
+
+/-- Check if a declaration uses sorry by checking immediate dependencies.
+
+    KEY INSIGHT: Since we check EVERY project declaration, we don't need deep traversal.
+    If helperLemma uses sorry, we'll catch it when we check helperLemma directly.
+    We only need to check if this declaration's immediate dependencies include sorryAx. -/
+def usagesSorry (env : Environment) (declName : Name) : MetaM Bool := do
+  try
+    let some declInfo := env.find? declName | return false
+
+    -- Get direct dependencies
+    let directDeps := match declInfo with
+      | .defnInfo val => val.value.getUsedConstants
+      | .thmInfo val => val.value.getUsedConstants
+      | .axiomInfo _ => if declName == ``sorryAx then #[``sorryAx] else #[]
+      | _ => #[]
+
+    -- Check if sorryAx is in direct dependencies
+    return directDeps.contains ``sorryAx
+  catch _ =>
+    return false
 
 /-! ## Re-Import Test (Module Visibility Checking) -/
 
@@ -163,9 +193,12 @@ def isFromProofsModule (env : Environment) (name : Name) (projectPrefix : String
     that private imports are not re-exported. We verify that ProofOfMainTheorem uses private
     imports for Proofs/ modules, so their declarations won't be visible to downstream importers. -/
 def checkModuleVisibility (env : Environment) (projectPrefix : String)
-    (statementName theoremName : Name) (mode : VerificationMode) : CheckResult := Id.run do
+    (statementName theoremName : Name) (mode : VerificationMode)
+    (index : Option EnvironmentIndex := none) : CheckResult := Id.run do
   -- Get all declarations from project modules in the loaded environment
-  let projectDecls := getVisibleProjectDeclarations env projectPrefix
+  let projectDecls := match index with
+    | some idx => idx.userDeclarations.toList
+    | none => getVisibleProjectDeclarations env projectPrefix
 
   -- Filter to user-defined declarations (defs and theorems)
   let userDecls := filterUserDeclarations env projectDecls
@@ -176,8 +209,12 @@ def checkModuleVisibility (env : Environment) (projectPrefix : String)
     if d == statementName || d == theoremName then true
     -- In default mode, Definitions/ content is allowed (it's human-reviewed)
     else if mode == .default && isFromDefinitionsModule env d projectPrefix then true
-    -- Proofs/ declarations: trusted to be hidden by module system's private import
-    -- (ProofOfMainTheorem should use `import`, not `public import`, for Proofs/)
+    -- TRUST ASSUMPTION (not verified by TAIL):
+    -- Proofs/ declarations are assumed to be hidden by Lean's module system.
+    -- This requires ProofOfMainTheorem.lean to use `import` (NOT `public import`)
+    -- for any Proofs/ modules. The TAIL standard relies on Lean's module system
+    -- to prevent re-export of helper lemmas. Users must ensure their imports
+    -- follow this convention; TAIL cannot statically verify import modifiers.
     else if isFromProofsModule env d projectPrefix then true
     -- MainTheorem module declarations (besides StatementOfTheorem) are a concern
     else false
@@ -198,5 +235,50 @@ def checkModuleVisibility (env : Environment) (projectPrefix : String)
     CheckResult.fail "Module Visibility"
       s!"{violations.length} internal declarations leaked from project modules"
       details
+
+/-! ## Environment Indexing -/
+
+/-- Build environment index by single traversal of env.constants.
+    This eliminates redundant traversals across multiple checks.
+    Only processes project modules, skipping all Mathlib declarations. -/
+def buildEnvironmentIndex (env : Environment) (projectPrefix : String) : EnvironmentIndex := Id.run do
+  let mut projectModules : Std.HashSet Name := {}
+  let mut moduleDecls : Std.HashMap Name (Array Name) := {}
+  let mut projectDecls : Array Name := #[]
+  let mut userDecls : Array Name := #[]
+
+  -- Filter to project modules first (avoid processing all of Mathlib)
+  let allModules := env.header.moduleNames
+  let projectModuleSet := allModules.filter fun modName =>
+    modName.toString.startsWith projectPrefix
+
+  -- Single traversal of environment, but only process project declarations
+  for (name, _) in env.constants.toList do
+    -- Early exit: skip if not from a project module
+    let some modName := getModuleName env name | continue
+    if !projectModuleSet.contains modName then continue
+
+    let nameStr := name.toString
+
+    -- Track project declarations (including module-private ones)
+    if nameStr.startsWith projectPrefix || nameStr.startsWith s!"_private.{projectPrefix}" then
+      projectDecls := projectDecls.push name
+
+      -- Filter to user-visible declarations
+      if !isInternalName name && !nameStr.startsWith "_private" then
+        userDecls := userDecls.push name
+
+    -- Build module index
+    projectModules := projectModules.insert modName
+    match moduleDecls[modName]? with
+    | some existing => moduleDecls := moduleDecls.insert modName (existing.push name)
+    | none => moduleDecls := moduleDecls.insert modName #[name]
+
+  return {
+    projectModules := projectModules.toArray
+    moduleDeclarations := moduleDecls
+    projectDeclarations := projectDecls
+    userDeclarations := userDecls
+  }
 
 end TAIL

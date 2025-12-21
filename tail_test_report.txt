@@ -5,49 +5,574 @@ TAIL TEST HARNESS
 ── VIOLATION DETECTION TESTS ─────────────────────────────────────────
 These fixtures contain intentional violations that TAIL should detect.
 
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Structure/MissingStatement (Structure)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Structure/WrongStatementType (Structure)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Structure/NonMathlibImport (Structure)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/UseSorry (Soundness)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/UseNativeDecide (Soundness)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/Soundness/CustomAxiom (Soundness)
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Structure/MissingStatement (Structure)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Structure/WrongStatementType (Structure)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Structure/NonMathlibImport (Structure)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Soundness/UseSorry (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Soundness/UseNativeDecide (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Soundness/CustomAxiom (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
 ✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/Soundness/OpaqueDef (Soundness)
-    Error loading fixture: object file '/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean/TestFixtures/ViolationDetection/Soundness/OpaqueDef/ProofOfMainTheorem.olean' of module TestFixtures.ViolationDetection.Soundness.OpaqueDef.ProofOfMainTheorem does not exist
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/MultipleTheorems (ProofMinimality)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/ExtraDefinition (ProofMinimality)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ProofMinimality/ZeroTheorems (ProofMinimality)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/MainTheoremPurity/TheoremInStatement (MainTheoremPurity)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ModuleVisibility/LeakedHelper (ModuleVisibility)
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ModuleVisibility/MissingModuleKeyword (ModuleVisibility)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ProofMinimality/MultipleTheorems (ProofMinimality)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ProofMinimality/ExtraDefinition (ProofMinimality)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ProofMinimality/ZeroTheorems (ProofMinimality)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/MainTheoremIsIsolated/TheoremInStatement (MainTheoremIsIsolated)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ModuleVisibility/LeakedHelper (ModuleVisibility)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ModuleVisibility/MissingModuleKeyword (ModuleVisibility)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
 ✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ModuleVisibility/WrongImportType (ModuleVisibility)
-    FALSE NEGATIVE: Check passed but should have failed. Message: Only StatementOfTheorem and mainTheorem are exported from project modules
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
 ✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ModuleVisibility/MissingExpose (ModuleVisibility)
-    FALSE NEGATIVE: Check passed but should have failed. Message: Only StatementOfTheorem and mainTheorem are exported from project modules
-✓ VIOLATION detected (expected) - TestFixtures/ViolationDetection/ModuleVisibility/HelperNotInModule (ModuleVisibility)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ NO VIOLATION detected (expected VIOLATION) - TestFixtures/ViolationDetection/ModuleVisibility/HelperNotInModule (ModuleVisibility)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
 
 ── FALSE POSITIVE PREVENTION TESTS ───────────────────────────────────
 These fixtures are valid and should pass all checks.
 
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Structure/ValidBasic (Structure)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Structure/MultipleMathlibImports (Structure)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Structure/AllowedImports (Structure)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesStandardAxioms (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesDecide (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesClassicalLogic (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesQuotient (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/DeepDependencyChain (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesSimpWithMathlib (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/UsesRflAndTrivial (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/Soundness/ComplexValidProof (Soundness)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ProofMinimality/ExactlyOneTheorem (ProofMinimality)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ProofMinimality/WithInternalAux (ProofMinimality)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/MainTheoremPurity/OnlyDefs (MainTheoremPurity)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/MainTheoremPurity/MultipleHelperDefs (MainTheoremPurity)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ModuleVisibility/ProperModuleSystem (ModuleVisibility)
-✓ COMPLIANT (expected) - TestFixtures/FalsePositivePrevention/ModuleVisibility/PublicReexports (ModuleVisibility)
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Structure/ValidBasic (Structure)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Structure/MultipleMathlibImports (Structure)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Structure/AllowedImports (Structure)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/UsesStandardAxioms (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/UsesDecide (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/UsesClassicalLogic (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/UsesQuotient (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/DeepDependencyChain (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/UsesSimpWithMathlib (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/UsesRflAndTrivial (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/Soundness/ComplexValidProof (Soundness)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/ProofMinimality/ExactlyOneTheorem (ProofMinimality)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/ProofMinimality/WithInternalAux (ProofMinimality)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/MainTheoremIsIsolated/OnlyDefs (MainTheoremIsIsolated)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/MainTheoremIsIsolated/MultipleHelperDefs (MainTheoremIsIsolated)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/ModuleVisibility/ProperModuleSystem (ModuleVisibility)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+✗ VIOLATION detected (expected COMPLIANT) - TestFixtures/FalsePositivePrevention/ModuleVisibility/PublicReexports (ModuleVisibility)
+    Error loading fixture: unknown module prefix 'TestFixtures'
+
+No directory 'TestFixtures' or file 'TestFixtures.olean' in the search path entries:
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Cli/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/batteries/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/Qq/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/aesop/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/proofwidgets/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/importGraph/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/plausible/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/mathlib/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/packages/lean4checker/.lake/build/lib/lean
+/Users/eric/Documents/GitHub/TAIL/.lake/build/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
+/Users/eric/.elan/toolchains/leanprover--lean4---v4.27.0-rc1/lib/lean
 
 ----------------------------------------------------------------------
-Violation Detection: 13/16 violations correctly detected
-False Positive Prevention: 17/17 valid fixtures correctly passed
-Total: 30/33 tests passed
+Violation Detection: 0/16 violations correctly detected
+False Positive Prevention: 0/17 valid fixtures correctly passed
+Total: 0/33 tests passed
 ======================================================================

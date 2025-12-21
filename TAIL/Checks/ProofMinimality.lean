@@ -19,12 +19,12 @@ namespace TAIL.Checks
 open Lean Meta
 
 /-- Verify proof file contains exactly one theorem -/
-def checkProofMinimality (resolved : ResolvedConfig) : MetaM CheckResult := do
+def checkProofMinimality (resolved : ResolvedConfig) (index : Option TAIL.EnvironmentIndex := none) : MetaM CheckResult := do
   let env ← getEnv
   let proofModule := resolved.proofOfMainTheoremModule
 
   -- Get all declarations in the ProofOfMainTheorem module
-  let decls := TAIL.getModuleDeclarations env proofModule
+  let decls := TAIL.getModuleDeclarations env proofModule index
 
   -- Filter to theorems only (exclude internal/auxiliary)
   let theorems := decls.filter fun name =>

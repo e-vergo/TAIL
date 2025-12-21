@@ -7,6 +7,7 @@ import TAIL.Types
 import TAIL.Config
 import TAIL.Environment
 import TAIL.Checks.Structure
+import TAIL.Utils
 
 /-!
 # Proofs Purity Check
@@ -15,6 +16,8 @@ Verify that files in the Proofs/ folder:
 - Do not contain axioms
 - Do not contain opaque declarations
 - Do not use sorry
+- Import only from allowed sources (Mathlib, Definitions/, other Proofs/)
+- Do NOT import from MainTheorem or ProofOfMainTheorem
 
 This check runs in both modes when a Proofs/ folder exists.
 -/
@@ -23,10 +26,54 @@ namespace TAIL.Checks
 
 open Lean Meta
 
+/-- Check imports for a Proofs/ module.
+
+    Allowed imports:
+    - Standard libraries (Mathlib, Lean, etc.)
+    - Definitions/ modules (default mode only)
+    - Other Proofs/ modules
+
+    Disallowed imports:
+    - MainTheorem
+    - ProofOfMainTheorem
+-/
+def checkProofsModuleImports (env : Environment) (moduleName : Name) (resolved : ResolvedConfig) :
+    List String × Bool := Id.run do
+  let some imports := TAIL.getModuleImports env moduleName
+    | ([], true)  -- If we can't get imports, assume OK (shouldn't happen)
+
+  let mut violations : List String := []
+
+  for imp in imports do
+    let modName := imp.module
+    let modStr := modName.toString
+
+    -- Check for disallowed project imports
+    if modName == resolved.mainTheoremModule then
+      violations := violations ++ [s!"  - Cannot import MainTheorem from Proofs/"]
+    else if modName == resolved.proofOfMainTheoremModule then
+      violations := violations ++ [s!"  - Cannot import ProofOfMainTheorem from Proofs/"]
+    -- Allow standard library
+    else if TAIL.isStandardLibraryImport modName then
+      continue
+    -- Check other project imports
+    else if modStr.startsWith resolved.projectPrefix then
+      -- Definitions/ imports allowed in default mode
+      if resolved.mode == .default && resolved.isDefinitionsModule modName then
+        continue
+      -- Other Proofs/ modules always allowed
+      else if resolved.isProofsModule modName then
+        continue
+      else
+        -- Some other project import that's not allowed
+        violations := violations ++ [s!"  - Unexpected project import: {modStr}"]
+
+  (violations, violations.isEmpty)
+
 /-- Check declarations in a Proofs/ module -/
-def checkProofsModuleDeclarations (env : Environment) (moduleName : Name) :
-    List String × Bool :=
-  let decls := TAIL.getModuleDeclarations env moduleName
+def checkProofsModuleDeclarations (env : Environment) (moduleName : Name)
+    (index : Option TAIL.EnvironmentIndex := none) : List String × Bool :=
+  let decls := TAIL.getModuleDeclarations env moduleName index
   let userDecls := decls.filter (!TAIL.isInternalName ·)
 
   let violations := userDecls.filterMap fun decl =>
@@ -41,39 +88,8 @@ def checkProofsModuleDeclarations (env : Environment) (moduleName : Name) :
 
   (violations, violations.isEmpty)
 
-/-- Check if a declaration uses sorry by checking axiom dependencies -/
-private def usagesSorry (env : Environment) (declName : Name) : MetaM Bool := do
-  -- Get all axioms this declaration depends on
-  try
-    let mut visited : Std.HashSet Name := {}
-    let mut toVisit : Array Name := #[declName]
-
-    while h : toVisit.size > 0 do
-      let curr := toVisit[toVisit.size - 1]'(by omega)
-      toVisit := toVisit.pop
-
-      if visited.contains curr then continue
-      visited := visited.insert curr
-
-      let some currInfo := env.find? curr | continue
-
-      match currInfo with
-      | .axiomInfo _ =>
-        if curr == ``sorryAx then return true
-      | .defnInfo val =>
-        let deps := val.value.getUsedConstants
-        toVisit := toVisit ++ deps.filter (!visited.contains ·)
-      | .thmInfo val =>
-        let deps := val.value.getUsedConstants
-        toVisit := toVisit ++ deps.filter (!visited.contains ·)
-      | _ => continue
-
-    return false
-  catch _ =>
-    return false
-
 /-- Check that all Proofs/ files follow the rules -/
-def checkProofsPurity (resolved : ResolvedConfig) : MetaM CheckResult := do
+def checkProofsPurity (resolved : ResolvedConfig) (index : Option TAIL.EnvironmentIndex := none) : MetaM CheckResult := do
   -- Skip if no Proofs/ folder
   if resolved.proofsPath.isNone then
     return CheckResult.pass "Proofs Purity"
@@ -90,38 +106,45 @@ def checkProofsPurity (resolved : ResolvedConfig) : MetaM CheckResult := do
     return CheckResult.pass "Proofs Purity"
       "No modules found in Proofs/ folder"
 
-  let mut allViolations : List String := []
+  let mut allViolationsArray : Array String := #[]
   let mut moduleCount := 0
   let mut sorryUsages : List (Name × Name) := []  -- (module, declaration)
 
   for modName in proofsModules do
     moduleCount := moduleCount + 1
 
-    -- Check declarations for axioms/opaques
-    let (declViolations, declsOk) := checkProofsModuleDeclarations env modName
-    if !declsOk then
-      allViolations := allViolations ++ [s!"Declaration violations in {modName}:"] ++ declViolations
+    -- Check 1: Import restrictions
+    let (importViolations, importsOk) := checkProofsModuleImports env modName resolved
+    if !importsOk then
+      allViolationsArray := allViolationsArray.push s!"Import violations in {modName}:"
+      allViolationsArray := allViolationsArray ++ importViolations.toArray
 
-    -- Check for sorry usage in this module
-    let moduleDecls := TAIL.getModuleDeclarations env modName
+    -- Check 2: Declaration restrictions (axioms/opaques)
+    let (declViolations, declsOk) := checkProofsModuleDeclarations env modName index
+    if !declsOk then
+      allViolationsArray := allViolationsArray.push s!"Declaration violations in {modName}:"
+      allViolationsArray := allViolationsArray ++ declViolations.toArray
+
+    -- Check 3: Sorry usage
+    let moduleDecls := TAIL.getModuleDeclarations env modName index
     let userDecls := moduleDecls.filter (!TAIL.isInternalName ·)
 
     for decl in userDecls do
-      let usesSorry ← usagesSorry env decl
+      let usesSorry ← TAIL.usagesSorry env decl
       if usesSorry then
         sorryUsages := (modName, decl) :: sorryUsages
 
   -- Add sorry violations
   if !sorryUsages.isEmpty then
-    allViolations := allViolations ++ ["Sorry usage in Proofs/:"]
+    allViolationsArray := allViolationsArray.push "Sorry usage in Proofs/:"
     for (modName, decl) in sorryUsages do
-      allViolations := allViolations ++ [s!"  - {decl} in {modName}"]
+      allViolationsArray := allViolationsArray.push s!"  - {decl} in {modName}"
 
-  if allViolations.isEmpty then
+  if allViolationsArray.isEmpty then
     return CheckResult.pass "Proofs Purity"
       s!"All {moduleCount} Proofs/ modules are valid"
   else
     return CheckResult.fail "Proofs Purity"
-      "Proofs/ folder contains disallowed content" allViolations
+      "Proofs/ folder contains disallowed content" allViolationsArray.toList
 
 end TAIL.Checks

@@ -29,13 +29,13 @@ open Lean Meta
     Default mode: StatementOfTheorem + defs (with warning to move to Definitions/)
 
     Both modes disallow: theorem, axiom, opaque, abbrev, instance -/
-def checkMainTheoremIsIsolated (resolved : ResolvedConfig) : MetaM CheckResult := do
+def checkMainTheoremIsIsolated (resolved : ResolvedConfig) (index : Option TAIL.EnvironmentIndex := none) : MetaM CheckResult := do
   let env ← getEnv
   let mainModule := resolved.mainTheoremModule
   let statementName := resolved.statementName'
 
   -- Get all declarations in the MainTheorem module
-  let decls := TAIL.getModuleDeclarations env mainModule
+  let decls := TAIL.getModuleDeclarations env mainModule index
   let userDecls := decls.filter (!TAIL.isInternalName ·)
 
   let mut theorems : List Name := []
