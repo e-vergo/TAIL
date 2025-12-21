@@ -7,14 +7,7 @@ import TAIL.Types
 import TAIL.Config
 import TAIL.FileUtils
 import TAIL.Report
-import TAIL.Checks.Structure
-import TAIL.Checks.Soundness
-import TAIL.Checks.ProofMinimality
-import TAIL.Checks.Imports
-import TAIL.Checks.MainTheoremIsIsolated
-import TAIL.Checks.ProofsPurity
-import TAIL.Checks.DefinitionsPurity
-import TAIL.Checks.Lean4Checker
+import TAIL.FastChecks
 
 /-!
 # TAIL Main
@@ -32,8 +25,6 @@ Project prefix is auto-detected from lakefile.lean.
 -/
 
 namespace TAIL
-
-open Lean Meta
 
 /-! ## Statistics Collection -/
 
@@ -78,35 +69,15 @@ def collectStats (resolved : ResolvedConfig) : IO ProjectStats := do
 
 /-! ## Check Orchestration -/
 
-/-- Run all MetaM-based checks (environment introspection).
-
-    Note: The first check will include ~1.4s of lazy initialization overhead from Lean's
-    environment machinery. This is unavoidable but only happens once per tool invocation. -/
-def runMetaChecks (resolved : ResolvedConfig) : MetaM (List CheckResult) := do
-  -- Build environment index once for shared use across checks
-  let env ← getEnv
-  let index := buildEnvironmentIndex env resolved.projectPrefix
-
-  -- Run all checks
-  let soundness ← Checks.checkSoundness resolved index
-  let structureCheck ← Checks.checkStructure resolved
-  let proofMinimality ← Checks.checkProofMinimality resolved
-  let mainTheoremIsolated ← Checks.checkMainTheoremIsIsolated resolved
-  let imports ← Checks.checkImports resolved
-  let proofsPurity ← Checks.checkProofsPurity resolved
-  let definitionsPurity ← Checks.checkDefinitionsPurity resolved
-
-  pure [soundness, structureCheck, proofMinimality, mainTheoremIsolated, imports, proofsPurity, definitionsPurity]
-
-/-- Run all checks and build report -/
-def runVerification (resolved : ResolvedConfig) : MetaM VerificationReport := do
-  let metaChecks ← runMetaChecks resolved
+/-- Run all checks and build report using the fast olean-based reader -/
+def runVerification (resolved : ResolvedConfig) : IO VerificationReport := do
+  let checks ← FastChecks.runFastChecks resolved
   let stats ← collectStats resolved
-  let allPassed := metaChecks.all (·.passed)
+  let allPassed := checks.all (·.passed)
 
   return {
     projectName := resolved.projectPrefix
-    checks := metaChecks
+    checks := checks
     stats := stats
     allPassed := allPassed
   }
@@ -184,20 +155,9 @@ def main (args : List String) : IO UInt32 := do
     IO.eprintln s!"Error: {e}"
     return (2 : UInt32)  -- Exit code 2 for config error
   | .ok resolved =>
-    -- Build the project module to get access to environment
-    let proofModule := s!"{resolved.projectPrefix}.ProofOfMainTheorem"
-    let imports : Array Lean.Import := #[{ module := proofModule.toName }]
-
     try
-      -- Initialize search path from LEAN_PATH environment variable
-      Lean.initSearchPath (← Lean.findSysroot)
-
-      let env ← Lean.importModules imports {}
-
-      let (report, _) ← Lean.Core.CoreM.toIO
-        (ctx := { fileName := "TAIL", fileMap := default, options := {} })
-        (s := { env })
-        (Lean.Meta.MetaM.run' (runVerification resolved))
+      -- Run verification using fast olean-based checks (no environment loading needed)
+      let report ← runVerification resolved
 
       -- Print to console
       printReport report cliArgs.format cliArgs.outputPath
@@ -210,9 +170,9 @@ def main (args : List String) : IO UInt32 := do
 
       return if report.allPassed then (0 : UInt32) else (1 : UInt32)
     catch e =>
-      IO.eprintln s!"Error loading project: {e}"
+      IO.eprintln s!"Error during verification: {e}"
       IO.eprintln "Make sure to run 'lake build' first."
-      return (3 : UInt32)  -- Exit code 3 for build error
+      return (3 : UInt32)  -- Exit code 3 for verification error
 
 end TAIL
 

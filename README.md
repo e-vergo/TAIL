@@ -2,11 +2,11 @@
 
 **T**emplate for **AI**-generated **L**ean
 
-A verification tool for Lean 4 projects that aims to reduce the review burden for AI generated mathematical proofs
+A verification tool for Lean 4 projects that reduces the review burden for AI-generated mathematical proofs.
 
 ## The TAIL Standard
 
-[TAIL proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.20proofs/near/556956052) a strict solution:
+[TAIL proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/near/556956052) a strict solution:
 
 > Projects "don't count" unless:
 > - They contain a file `MainTheorem.lean`, which has **no imports outside of Mathlib**, and contains the main result as `def StatementOfTheorem : Prop := ...`
@@ -30,9 +30,37 @@ With the Lean 4.27+ module system, `ProofOfMainTheorem.lean` uses **private impo
 
 **Result:** A human reviewer needs only to read `MainTheorem.lean` (and `Definitions/` in default mode) to understand what is being proven.
 
-## How It Works
+## Quick Start
 
-### Required Structure
+### Verifying an Existing Project
+
+```bash
+# Clone TAIL
+git clone https://github.com/e-vergo/TAIL.git
+cd TAIL
+
+# Build
+lake exe cache get  # Download cached Mathlib
+lake build
+
+# Verify a project (default mode)
+lake exe tailverify /path/to/your/project
+
+# Verify in strict mode
+lake exe tailverify --strict /path/to/your/project
+```
+
+### Creating a New TAIL-Compliant Project
+
+```bash
+# Generate a new project structure
+lake exe tailscaffold MyTheorem
+cd MyTheorem
+lake update
+lake exe cache get
+```
+
+## Project Structure
 
 All names are hardcoded per the TAIL Standard:
 - `MainTheorem.lean` - statement file
@@ -44,7 +72,7 @@ All names are hardcoded per the TAIL Standard:
 
 The project prefix is auto-detected from your `lakefile.lean`.
 
-#### Strict Mode Structure
+### Strict Mode Structure
 ```
 ProjectName/
 ├── MainTheorem.lean            [HUMAN REVIEW]
@@ -52,7 +80,7 @@ ProjectName/
 └── Proofs/                     [MACHINE VERIFIED] (optional)
 ```
 
-#### Default Mode Structure
+### Default Mode Structure
 ```
 ProjectName/
 ├── MainTheorem.lean            [HUMAN REVIEW]
@@ -62,180 +90,217 @@ ProjectName/
 └── Proofs/                     [MACHINE VERIFIED] (optional)
 ```
 
+### Example Files
+
 ```lean
 -- MainTheorem.lean (HUMAN REVIEW REQUIRED)
-import Mathlib.Data.Complex.Basic  -- Mathlib only in strict mode
-import MyProject.Definitions.Types -- Allowed in default mode
+module
+
+public import Mathlib.Data.Complex.Basic  -- Mathlib only in strict mode
+public import MyProject.Definitions.Types -- Allowed in default mode
 
 namespace MyProject
 
+@[expose] public section
+
 def StatementOfTheorem : Prop :=
   forall n : Nat, SomeInterestingProperty n
+
+end
 
 end MyProject
 ```
 
 ```lean
 -- ProofOfMainTheorem.lean (MACHINE VERIFIED)
-module                              -- Enable module system (Lean < 4.27)
+module
 
 public import Mathlib               -- Re-exported to importers
-import MyProject.MainTheorem        -- Private (not re-exported)
-import MyProject.Definitions        -- Private (not re-exported)
+public import MyProject.MainTheorem -- Re-exported (contains StatementOfTheorem)
 import MyProject.Proofs.Helpers     -- Private (not re-exported)
 
 namespace MyProject
 
-public section
+@[expose] public section
+
 theorem mainTheorem : StatementOfTheorem := by
   -- proof using private imports
+
+end
 
 end MyProject
 ```
 
-### Verification Checks
+## Verification Checks
 
 | Check | Description |
 |-------|-------------|
-| Structure | `ProjectName.StatementOfTheorem : Prop` and `ProjectName.mainTheorem` exist; imports validated per mode |
-| Soundness | Only standard axioms (propext, Quot.sound, Classical.choice, funext); no sorry; no native_decide; no custom axioms/opaques |
-| ProofMinimality | ProofOfMainTheorem.lean contains exactly one theorem |
-| StatementPurity | MainTheorem.lean contains no theorems; extra defs warn in default mode, error in strict mode |
-| DefinitionsPurity | Definitions/ contains only defs/structures (no theorems); only imports Mathlib or other Definitions/ files |
-| Module Visibility | Only `StatementOfTheorem` and `mainTheorem` are exported (requires module system) |
-| Lean4Checker | Kernel verification via [lean4checker](https://github.com/leanprover/lean4checker) |
+| Structure | `ProjectName.StatementOfTheorem : Prop` and `ProjectName.mainTheorem` exist |
+| Soundness | Only standard axioms (propext, Quot.sound, Classical.choice, funext); no sorry; no native_decide |
+| Proof Minimality | ProofOfMainTheorem.lean contains exactly one public theorem |
+| MainTheorem Isolation | MainTheorem.lean contains no theorems; extra defs warn in default mode, error in strict mode |
+| Import Discipline | MainTheorem.lean only imports Mathlib (strict) or Mathlib + Definitions/ (default) |
+| Proofs Purity | Proofs/ contains only lemmas and Prop-valued definitions (no structures, no data defs) |
+| Definitions Purity | Definitions/ contains only defs/structures (no theorems, no sorry) |
 
-All checks use **environment introspection** rather than text parsing for maximum reliability.
+All checks use **direct olean file reading** for fast verification (~1 second) without importing the project.
 
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/e-vergo/KM_Inspection.git
-cd KM_Inspection
-
-# Build
-lake exe cache get  # Download cached Mathlib (recommended)
-lake build
-```
-
-## Usage
-
-### Verifying a Project
+## CLI Usage
 
 ```bash
-# Run from the target project's root directory (default mode)
-lake exe tailverify
+# Default mode (allows Definitions/ folder)
+lake exe tailverify [directory]
 
-# Strict mode (original TAIL Standard - no Definitions/ allowed)
-lake exe tailverify --strict
+# Strict mode (original TAIL Standard)
+lake exe tailverify --strict [directory]
 
-# Or specify the project path
-lake exe tailverify /path/to/project
-
-# JSON output for CI integration
-lake exe tailverify --json
-
-# Write output to file
-lake exe tailverify --output report.txt
-```
-
-### Creating a New Project
-
-```bash
-# Generate a TAIL Standard project structure
-lake exe tailscaffold MyTheorem
-cd MyTheorem
-lake update
-lake exe cache get
+# Additional options
+lake exe tailverify --json              # JSON output for CI
+lake exe tailverify --output report.txt # Write to file
+lake exe tailverify --report            # Generate tail_compliance_report.txt
+lake exe tailverify --prefix MyProject  # Override auto-detected prefix
+lake exe tailverify --help              # Show all options
 ```
 
 ### Exit Codes
 
 | Code | Meaning |
 |------|---------|
-| 0 | All checks passed (VERIFIED) |
+| 0 | All checks passed |
 | 1 | One or more checks failed |
 | 2 | Configuration error (missing lakefile, files, etc.) |
 | 3 | Build error (project not compiled) |
 
-### Example Output
+## Example Output
 
-#### Strict Mode
+### Passing Project (Default Mode)
 ```
 ================================================================================
-KIM MORRISON STANDARD COMPLIANCE REPORT
-Project: MyProject
+TAIL STANDARD COMPLIANCE REPORT
+Project: PassAll
+Tool: TAIL v0.1
 ================================================================================
 
-TRUST TIER SUMMARY (STRICT KIM MORRISON STANDARD)
+TRUST TIER SUMMARY (EXTENDED TAIL STANDARD)
 --------------------------------------------------------------------------------
   [HUMAN REVIEW]
-    MainTheorem.lean                            27 lines
+    MainTheorem.lean                            28 lines
+    Definitions/ (1 files)                     30 lines
   [MACHINE VERIFIED]
-    ProofOfMainTheorem.lean                     60 lines
+    ProofOfMainTheorem.lean                     20 lines
+    Proofs/ (1 files)                         32 lines
 --------------------------------------------------------------------------------
-  REVIEW BURDEN: 27 lines (MainTheorem.lean only)
-  TOTAL: 87 lines (31% requires review)
+  REVIEW BURDEN: 58 lines (MainTheorem.lean + Definitions/)
+  TOTAL: 110 lines (52% requires review)
 
 CHECKS
 --------------------------------------------------------------------------------
   [PASS] Structure
   [PASS] Soundness
   [PASS] Proof Minimality
-  [PASS] Statement Purity
+  [PASS] MainTheorem Isolation
+  [PASS] Import Discipline
+  [PASS] Proofs Purity
   [PASS] Definitions Purity
-  [PASS] Module Visibility
-  [PASS] Lean4Checker
 
 ================================================================================
 RESULT: PROJECT MEETS TEMPLATE EXPECTATIONS
+
+This project meets the TAIL Standard for AI-generated formal proofs.
+A human reviewer only needs to verify MainTheorem.lean to trust the result.
 ================================================================================
 ```
 
-#### Default Mode (with Definitions/)
+### Failing Project
 ```
 ================================================================================
-KIM MORRISON STANDARD COMPLIANCE REPORT
-Project: MyProject
+TAIL STANDARD COMPLIANCE REPORT
+Project: FailAll
+Tool: TAIL v0.1
 ================================================================================
 
-TRUST TIER SUMMARY (EXTENDED KIM MORRISON STANDARD)
+...
+
+CHECKS
 --------------------------------------------------------------------------------
-  [HUMAN REVIEW]
-    MainTheorem.lean                            27 lines
-    Definitions/ (3 files)                      85 lines
-  [MACHINE VERIFIED]
-    ProofOfMainTheorem.lean                     60 lines
-    Proofs/ (2 files)                           120 lines
---------------------------------------------------------------------------------
-  REVIEW BURDEN: 112 lines (MainTheorem.lean + Definitions/)
-  TOTAL: 292 lines (38% requires review)
+  [PASS] Structure
+  [FAIL] Soundness
+         CRITICAL: The following declarations use 'sorry':
+           - FailAll.mainTheorem
+  [FAIL] Proof Minimality
+         Multiple theorems/axioms found (3):
+           - theorem FailAll.extraTheorem
+           - theorem FailAll.anotherExtraTheorem
+           - theorem FailAll.mainTheorem
+  [FAIL] MainTheorem Isolation
+         ERROR: theorem FailAll.badTheorem (theorems not allowed in MainTheorem.lean)
+  [FAIL] Import Discipline
+         MainTheorem.lean import violations:
+           - FailAll.Proofs.BadHelper (project import not allowed)
+  ...
+
+================================================================================
+RESULT: PROJECT FAILS TO MEET TEMPLATE EXPECTATIONS
+
+Please fix the issues above before requesting review.
+================================================================================
 ```
 
 ## Integrating Into Your Project
 
-1. Add TAIL as a dependency in your `lakefile.lean`:
-   ```lean
-   require TAIL from git
-     "https://github.com/e-vergo/KM_Inspection"
+### Option 1: Run from TAIL Repository
 
-   require lean4checker from git
-     "https://github.com/leanprover/lean4checker"
+```bash
+# Clone and build TAIL once
+git clone https://github.com/e-vergo/TAIL.git
+cd TAIL && lake build
 
-   package MyProject where
-     -- Note: experimental.module is no longer required as of Lean 4.27+
-   ```
+# Verify any project
+lake exe tailverify /path/to/your/project
+```
 
-2. Organize your code following the standard:
-   - `{ProjectPrefix}/MainTheorem.lean` with `ProjectName.StatementOfTheorem`
-   - `{ProjectPrefix}/ProofOfMainTheorem.lean` with `ProjectName.mainTheorem`
-   - `{ProjectPrefix}/Definitions/` for supporting types (default mode)
-   - `{ProjectPrefix}/Proofs/` for helper lemmas (optional)
+### Option 2: Add as Dependency
 
-3. Run `lake exe tailverify` (or `lake exe tailverify --strict` for strict mode)
+Add TAIL as a dev dependency in your `lakefile.lean`:
 
-No configuration file needed - project prefix is auto-detected from `lakefile.lean`.
+```lean
+require TAIL from git
+  "https://github.com/e-vergo/TAIL.git"
+
+package MyProject where
+  version := v!"0.1.0"
+
+require mathlib from git
+  "https://github.com/leanprover-community/mathlib4.git"
+
+@[default_target]
+lean_lib MyProject where
+```
+
+Then run:
+```bash
+lake build
+lake exe tailverify
+```
+
+## Test Fixtures
+
+The repository includes test fixtures demonstrating correct and incorrect project structures:
+
+| Fixture | Mode | Description |
+|---------|------|-------------|
+| `TestFixtures/PassAll` | default | Passes all checks (with Definitions/) |
+| `TestFixtures/PassAllStrict` | strict | Passes all checks (no Definitions/) |
+| `TestFixtures/FailAll` | default | Fails multiple checks (for testing) |
+| `TestFixtures/FailAllStrict` | strict | Fails strict-mode checks (for testing) |
+
+Run the test fixtures:
+```bash
+lake exe tailverify TestFixtures/PassAll           # Should pass
+lake exe tailverify --strict TestFixtures/PassAllStrict  # Should pass
+lake exe tailverify TestFixtures/FailAll           # Should fail
+lake exe tailverify --strict TestFixtures/FailAllStrict  # Should fail
+```
 
 ## Reference
 

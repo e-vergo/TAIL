@@ -76,9 +76,13 @@ The project name is auto-detected from `lakefile.lean`.
 | Category | Allowed | Disallowed |
 |----------|---------|------------|
 | **Imports** | Mathlib, project files | |
-| **Declarations** | Any `def`, `theorem`, `lemma` | `axiom` |
-| | | `opaque` |
+| **Declarations** | `theorem`, `lemma` | `axiom` |
+| | `def` with proof obligation (returns `Prop`) | `opaque` |
 | | | `sorry` |
+| | | `structure`, `inductive` |
+| | | `def` without proof obligation |
+
+**Purpose:** Contains helper lemmas for the main proof. All declarations must have proof obligations (be Prop-valued or prove something). Data definitions and structures belong in `Definitions/`.
 
 **Strict Mode Violations → Errors**
 
@@ -133,9 +137,13 @@ The project name is auto-detected from `lakefile.lean`.
 | Category | Allowed | Disallowed |
 |----------|---------|------------|
 | **Imports** | Mathlib, `Definitions/`, other `Proofs/` files | |
-| **Declarations** | Any `def`, `theorem`, `lemma` | `axiom` |
-| | | `opaque` |
+| **Declarations** | `theorem`, `lemma` | `axiom` |
+| | `def` with proof obligation (returns `Prop`) | `opaque` |
 | | | `sorry` |
+| | | `structure`, `inductive` |
+| | | `def` without proof obligation |
+
+**Purpose:** Contains helper lemmas for the main proof. All declarations must have proof obligations (be Prop-valued or prove something). Data definitions and structures belong in `Definitions/`.
 
 ---
 

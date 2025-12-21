@@ -123,7 +123,7 @@ def extractProjectPrefix (projectRoot : System.FilePath) : IO (Except String Str
         return .ok name.toString
     return .error "Could not find 'name = \"...\"' in lakefile.toml"
 
-  -- Parse lakefile.lean: package <Name> where
+  -- Parse lakefile.lean: package <Name> where or package "Name" where
   let content ← IO.FS.readFile lakefilePath
   for line in content.splitOn "\n" do
     let trimmed := line.trimAscii
@@ -131,7 +131,9 @@ def extractProjectPrefix (projectRoot : System.FilePath) : IO (Except String Str
       let rest := trimmed.drop 8  -- "package ".length
       let name := rest.takeWhile (fun c => c != ' ' && c != '\n')
       if name.isEmpty then continue
-      return .ok name.toString
+      -- Strip quotes if present (e.g., package "TDCSG" where)
+      let unquoted := name.replace "\"" ""
+      return .ok unquoted
   return .error "Could not find 'package <Name> where' in lakefile.lean"
 
 /-! ## Resolution -/

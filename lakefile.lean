@@ -29,20 +29,3 @@ lean_exe tailverify where
 lean_exe tailscaffold where
   root := `TAIL.Scaffold
   supportInterpreter := true
-
--- Example project demonstrating Kim Morrison Standard compliance (strict mode)
-lean_lib Example where
-  globs := #[.submodules `Example]
-
--- Example project demonstrating default mode with Definitions/
-lean_lib DefaultExample where
-  globs := #[.submodules `DefaultExample]
-
--- Test fixtures for verification checks
-lean_lib TestFixtures where
-  globs := #[.submodules `TestFixtures]
-
--- Test harness executable
-lean_exe tailtest where
-  root := `TAIL.Test
-  supportInterpreter := true
