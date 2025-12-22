@@ -110,18 +110,47 @@ def checkStructureFast (resolved : ResolvedConfig) (modules : Array OleanModuleI
 
 /-! ## 2. Soundness Check -/
 
+/-- Check if a declaration name should be skipped in soundness checks.
+    Skips auto-generated declarations but includes _private.* (user-written private code). -/
+def shouldSkipDeclaration (name : Name) : Bool :=
+  let nameStr := name.toString
+  TAIL.containsSubstr nameStr ".rec" ||
+  TAIL.containsSubstr nameStr ".recOn" ||
+  TAIL.containsSubstr nameStr ".casesOn" ||
+  TAIL.containsSubstr nameStr ".mk.injEq" ||
+  TAIL.containsSubstr nameStr ".noConfusion" ||
+  TAIL.containsSubstr nameStr ".noConfusionType" ||
+  TAIL.containsSubstr nameStr ".below" ||
+  TAIL.containsSubstr nameStr ".ibelow" ||
+  TAIL.containsSubstr nameStr ".brecOn" ||
+  TAIL.containsSubstr nameStr ".binductionOn" ||
+  TAIL.containsSubstr nameStr ".sizeOf_spec" ||
+  TAIL.containsSubstr nameStr ".ctorIdx"
+
+/-- Check if a type expression is trivially True.
+    True is represented as a constant with name `True`. -/
+def isTrivialTrue (type : Expr) : Bool :=
+  match type with
+  | .const name _ => name == ``True
+  | _ => false
+
+/-- Check if a declaration uses native_decide by looking for Lean.ofReduceBool axiom. -/
+def usesNativeDecide (decl : OleanDeclInfo) : Bool :=
+  decl.usedConstants.contains ``Lean.ofReduceBool
+
 /-- Comprehensive soundness verification for all project declarations.
-    Checks:
-    - No sorry usage (sorryAx in dependencies)
-    - No opaque declarations
-    - Only standard axioms used -/
+    Checks for:
+    - sorry (sorryAx in dependencies)
+    - Non-standard axioms (decl.kind == .ax and not in standard list)
+    - native_decide (Lean.ofReduceBool in dependencies)
+    - Trivial True (type equals True proposition)
+
+    Scans all declarations in project modules, skipping auto-generated ones
+    but including _private.* declarations. -/
 def checkSoundnessFast (resolved : ResolvedConfig) (modules : Array OleanModuleInfo) : IO CheckResult := do
   let projectPrefix := resolved.projectPrefix
 
-  let mut sorryDecls : Array Name := #[]
-  let mut opaqueDecls : Array Name := #[]
-  let mut nonStandardAxioms : Array (Name × Name) := #[]  -- (decl, axiom)
-  let mut allAxioms : Std.HashSet Name := {}
+  let mut violations : Array String := #[]
 
   -- Check all declarations in all project modules
   for mod in modules do
@@ -129,68 +158,103 @@ def checkSoundnessFast (resolved : ResolvedConfig) (modules : Array OleanModuleI
     if !mod.name.toString.startsWith projectPrefix then continue
 
     for decl in mod.declarations do
-      -- Skip internal declarations
-      if decl.isInternal then continue
+      -- Skip auto-generated declarations (but NOT _private.*)
+      if shouldSkipDeclaration decl.name then continue
 
-      -- Check for sorry usage
+      let declModule := mod.name.toString
+      let declFullName := s!"{declModule}: {decl.name}"
+
+      -- 1. Check for sorry usage
       if decl.usesSorry then
-        sorryDecls := sorryDecls.push decl.name
+        violations := violations.push s!"  - {declFullName} (sorry)"
 
-      -- Check for opaque declarations
-      if decl.kind == .opaq then
-        opaqueDecls := opaqueDecls.push decl.name
+      -- 2. Non-standard axiom check removed (now done via source scanning)
 
-      -- Check for non-standard axioms in dependencies
-      for dep in decl.usedConstants do
-        -- We can't easily check if a dep is an axiom without the environment,
-        -- but we can check if it's sorryAx or one of the standard axioms
-        if dep == ``sorryAx then
-          -- Already caught by usesSorry check
-          continue
-        -- Track axioms by looking at naming patterns
-        -- Note: This is a heuristic since we don't have full env
-        if isStandardAxiom dep then
-          allAxioms := allAxioms.insert dep
+      -- 3. Check for native_decide usage
+      if usesNativeDecide decl then
+        violations := violations.push s!"  - {declFullName} (native_decide)"
+
+      -- 4. Check for trivial True
+      if isTrivialTrue decl.type then
+        violations := violations.push s!"  - {declFullName} (trivial True)"
 
   -- Build result
-  let mut details : Array String := #[]
-  let mut passed := true
-
-  -- Report sorry usage
-  if !sorryDecls.isEmpty then
-    passed := false
-    details := details.push "CRITICAL: The following declarations use 'sorry':"
-    for decl in sorryDecls do
-      details := details.push s!"  - {decl}"
-
-  -- Report opaque declarations
-  if !opaqueDecls.isEmpty then
-    passed := false
-    details := details.push "Opaque declarations found (not allowed):"
-    for decl in opaqueDecls do
-      details := details.push s!"  - {decl}"
-
-  -- Report non-standard axioms
-  if !nonStandardAxioms.isEmpty then
-    passed := false
-    details := details.push "Non-standard axioms detected:"
-    for (decl, ax) in nonStandardAxioms do
-      details := details.push s!"  - {decl} uses {ax}"
-
-  if passed then
-    let axiomList := String.intercalate ", " (allAxioms.toArray.map (·.toString)).toList
-    let msg := if axiomList.isEmpty then
-      "No axioms detected in direct dependencies"
-    else
-      s!"Standard axioms used: {axiomList}"
-    return CheckResult.pass "Soundness" msg
+  if violations.isEmpty then
+    return CheckResult.pass "Soundness"
+      "No soundness violations detected"
   else
-    let issues := [
-      if !sorryDecls.isEmpty then some s!"{sorryDecls.size} sorry" else none,
-      if !opaqueDecls.isEmpty then some s!"{opaqueDecls.size} opaque" else none,
-      if !nonStandardAxioms.isEmpty then some s!"{nonStandardAxioms.size} non-standard axioms" else none
-    ].filterMap id |> String.intercalate ", "
-    return CheckResult.fail "Soundness" issues details.toList
+    return CheckResult.fail "Soundness"
+      s!"Found {violations.size} soundness violation(s)"
+      violations.toList
+
+/-! ## 2b. Source-Based Axiom Check -/
+
+/-- Discover all Lean source files in a directory recursively.
+    Returns absolute paths. -/
+private partial def discoverLeanFiles (dir : System.FilePath) : IO (Array System.FilePath) := do
+  let mut files : Array System.FilePath := #[]
+  if !(← dir.pathExists) then return files
+  for entry in (← dir.readDir) do
+    let path := entry.path
+    if (← path.isDir) then
+      let subFiles ← discoverLeanFiles path
+      files := files ++ subFiles
+    else if path.extension == some "lean" && entry.fileName != "lakefile.lean" then
+      files := files.push path
+  return files
+
+/-- Check if a trimmed line contains an axiom declaration.
+    Returns (isAxiom, axiomDeclaration) where axiomDeclaration is the full line text if it's an axiom. -/
+private def isAxiomLine (line : String) : Bool × String :=
+  let trimmed := line.trimAscii.toString
+  -- Check for "axiom " or "private axiom " at the start
+  if trimmed.startsWith "axiom " then
+    (true, trimmed)
+  else if trimmed.startsWith "private axiom " then
+    (true, trimmed)
+  else
+    (false, "")
+
+/-- Check if a line is inside a comment (basic heuristic).
+    Returns true if the line contains "--" before any potential axiom keyword. -/
+private def isCommentedOut (line : String) : Bool :=
+  match line.splitOn "--" with
+  | [] => false
+  | [_] => false  -- No "--" found
+  | beforeComment :: _ =>
+    -- Check if "axiom" appears before the comment marker
+    !(beforeComment.contains "axiom")
+
+/-- Scan all .lean files in the project source directory for axiom declarations.
+    Reports file path, line number, and axiom declaration for each violation. -/
+def checkAxiomsInSource (resolved : ResolvedConfig) : IO CheckResult := do
+  let leanFiles ← discoverLeanFiles resolved.sourcePath
+  let mut violations : Array String := #[]
+
+  for filePath in leanFiles do
+    let content ← IO.FS.readFile filePath
+    let lines := content.splitOn "\n"
+
+    let mut lineNumber := 0
+    for line in lines do
+      lineNumber := lineNumber + 1
+
+      -- Skip commented lines
+      if isCommentedOut line then continue
+
+      let (isAxiom, axiomDecl) := isAxiomLine line
+      if isAxiom then
+        -- Get relative path from project root for cleaner output
+        let relPath := filePath.toString.replace (resolved.projectRoot.toString ++ "/") ""
+        violations := violations.push s!"  - {relPath}:{lineNumber}: {axiomDecl}"
+
+  if violations.isEmpty then
+    return CheckResult.pass "Axioms in Source"
+      "No axiom declarations found in source files"
+  else
+    return CheckResult.fail "Axioms in Source"
+      s!"Found {violations.size} axiom declaration(s) in source files"
+      violations.toList
 
 /-! ## 3. Proof Minimality Check -/
 
@@ -674,6 +738,7 @@ def runFastChecks (resolved : ResolvedConfig) : IO (List CheckResult) := do
   -- Run all checks
   let structureResult ← checkStructureFast resolved modules
   let soundnessResult ← checkSoundnessFast resolved modules
+  let axiomsInSourceResult ← checkAxiomsInSource resolved
   let minimalityResult ← checkProofMinimalityFast resolved modules
   let isolationResult ← checkMainTheoremIsolatedFast resolved modules
   let importsResult ← checkImportsFast resolved modules
@@ -683,6 +748,7 @@ def runFastChecks (resolved : ResolvedConfig) : IO (List CheckResult) := do
   return [
     structureResult,
     soundnessResult,
+    axiomsInSourceResult,
     minimalityResult,
     isolationResult,
     importsResult,

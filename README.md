@@ -136,14 +136,21 @@ end MyProject
 | Check | Description |
 |-------|-------------|
 | Structure | `ProjectName.StatementOfTheorem : Prop` and `ProjectName.mainTheorem` exist |
-| Soundness | Only standard axioms (propext, Quot.sound, Classical.choice, funext); no sorry; no native_decide |
+| Soundness | No sorry; no native_decide; no trivial `True` declarations (via olean) |
+| Axioms in Source | No `axiom` declarations in source files (via source scanning) |
 | Proof Minimality | ProofOfMainTheorem.lean contains exactly one public theorem |
 | MainTheorem Isolation | MainTheorem.lean contains no theorems; extra defs warn in default mode, error in strict mode |
 | Import Discipline | MainTheorem.lean only imports Mathlib (strict) or Mathlib + Definitions/ (default) |
 | Proofs Purity | Proofs/ contains only lemmas and Prop-valued definitions (no structures, no data defs) |
 | Definitions Purity | Definitions/ contains only defs/structures (no theorems, no sorry) |
 
-All checks use **direct olean file reading** for fast verification (~1 second) without importing the project.
+### Verification Architecture
+
+TAIL uses a hybrid approach for fast, reliable verification:
+
+- **Olean-based checks**: Structure, Soundness, Proof Minimality, Isolation, Imports, Purity checks read compiled `.olean` files directly for fast verification (~1 second) without importing the project.
+
+- **Source-based checks**: Axiom detection scans `.lean` source files for `axiom` and `private axiom` declarations. This is necessary because Lean's module system stores `public section` theorems as axioms in olean files, making olean-based axiom detection unreliable.
 
 ## CLI Usage
 
@@ -197,6 +204,7 @@ CHECKS
 --------------------------------------------------------------------------------
   [PASS] Structure
   [PASS] Soundness
+  [PASS] Axioms in Source
   [PASS] Proof Minimality
   [PASS] MainTheorem Isolation
   [PASS] Import Discipline
@@ -225,8 +233,10 @@ CHECKS
 --------------------------------------------------------------------------------
   [PASS] Structure
   [FAIL] Soundness
-         CRITICAL: The following declarations use 'sorry':
-           - FailAll.mainTheorem
+           - FailAll.ProofOfMainTheorem: FailAll.mainTheorem (sorry)
+           - FailAll.MainTheorem: FailAll.badTheorem (trivial True)
+  [FAIL] Axioms in Source
+           - FailAll/Proofs/BadHelper.lean:24: axiom bad : 1 + 3 = 2
   [FAIL] Proof Minimality
          Multiple theorems/axioms found (3):
            - theorem FailAll.extraTheorem

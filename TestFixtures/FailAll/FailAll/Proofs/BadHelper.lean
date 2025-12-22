@@ -21,4 +21,6 @@ def goodPropDef : Prop := True
 /-- This lemma is fine -/
 lemma goodLemma : 1 + 1 = 2 := rfl
 
+axiom bad : 1 + 3 = 2
+
 end FailAll.Proofs
