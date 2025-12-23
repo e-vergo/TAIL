@@ -1,7 +1,7 @@
 # TAIL
-**<u>T</u>** emplate for **<u>AI</u>** -generated **<u>L</u>** ean
+**T**emplate for **AI**-generated **L**ean
 
-A verification tool that reduces the review burden for AI-generated lean proofs. T
+A verification tool that reduces the review burden for AI-generated lean proofs.
 
 ## The TAIL Standard
 
