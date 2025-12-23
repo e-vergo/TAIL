@@ -24,7 +24,7 @@ These files define *what* is being proven. A human must read and understand them
 
 ### Machine Verified
 - `ProofOfMainTheorem.lean` - Contains `mainTheorem : StatementOfTheorem`
-- `Proofs/` - Helper lemmas
+- `Proofs/` - Proof statements using the defined objects
 
 These files prove *how* the theorem holds. Lean's type checker guarantees correctness.
 
