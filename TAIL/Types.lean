@@ -62,10 +62,18 @@ def TrustLevel.requiresHumanReview : TrustLevel → Bool
 
 /-! ## Check Results -/
 
+/-- Categories for grouping checks in reports -/
+def CheckCategory.structure : String := "Structure"
+def CheckCategory.soundness : String := "Soundness"
+def CheckCategory.contentRules : String := "Content Rules"
+def CheckCategory.imports : String := "Import Discipline"
+
 /-- Result of a single verification check -/
 structure CheckResult where
   /-- Name of the check -/
   name : String
+  /-- Category for grouping in reports -/
+  category : String
   /-- Whether the check passed -/
   passed : Bool
   /-- Human-readable message -/
@@ -77,18 +85,19 @@ structure CheckResult where
 instance : ToJson CheckResult where
   toJson r := Json.mkObj [
     ("name", toJson r.name),
+    ("category", toJson r.category),
     ("passed", toJson r.passed),
     ("message", toJson r.message),
     ("details", toJson r.details)
   ]
 
 /-- Create a passing check result -/
-def CheckResult.pass (name : String) (message : String) : CheckResult :=
-  { name, passed := true, message, details := [] }
+def CheckResult.pass (category : String) (name : String) (message : String) : CheckResult :=
+  { name, category, passed := true, message, details := [] }
 
 /-- Create a failing check result -/
-def CheckResult.fail (name : String) (message : String) (details : List String := []) : CheckResult :=
-  { name, passed := false, message, details }
+def CheckResult.fail (category : String) (name : String) (message : String) (details : List String := []) : CheckResult :=
+  { name, category, passed := false, message, details }
 
 /-! ## Line Count Statistics -/
 
@@ -143,8 +152,12 @@ instance : ToJson ProjectStats where
 structure VerificationReport where
   /-- Project name/prefix -/
   projectName : String
+  /-- Verification mode (strict or default) -/
+  mode : VerificationMode
   /-- Results of all checks -/
   checks : List CheckResult
+  /-- Semantic risk warnings (notation, macro, etc.) -/
+  warnings : List String := []
   /-- Line count statistics -/
   stats : ProjectStats
   /-- Whether all checks passed -/
@@ -154,7 +167,9 @@ structure VerificationReport where
 instance : ToJson VerificationReport where
   toJson r := Json.mkObj [
     ("project", toJson r.projectName),
+    ("mode", toJson (if r.mode == .strict then "strict" else "default")),
     ("checks", toJson r.checks),
+    ("warnings", toJson r.warnings),
     ("stats", toJson r.stats),
     ("all_passed", toJson r.allPassed)
   ]

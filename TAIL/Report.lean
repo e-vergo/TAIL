@@ -58,11 +58,11 @@ def formatHeader (projectName : String) : String :=
   s!"{divider}\n"
 
 /-- Format trust tier summary -/
-def formatTierSummary (stats : ProjectStats) : String :=
+def formatTierSummary (mode : VerificationMode) (stats : ProjectStats) : String :=
   let hasDefinitions := stats.definitions.lineCount > 0
   let hasProofs := stats.proofs.lineCount > 0
 
-  let modeLabel := if hasDefinitions then "EXTENDED TAIL STANDARD" else "STRICT TAIL STANDARD"
+  let modeLabel := if mode == .strict then "STRICT TAIL STANDARD" else "EXTENDED TAIL STANDARD"
   let header := s!"\nTRUST TIER SUMMARY ({modeLabel})\n" ++ thinDivider ++ "\n"
 
   -- Human Review Tier
@@ -98,23 +98,43 @@ def formatTierSummary (stats : ProjectStats) : String :=
   machineHeader ++ proofLine ++ proofsLine ++
   separator ++ reviewDesc ++ totalLine
 
-/-- Format a single check result -/
+/-- Format a single check result with indentation for category grouping -/
 def formatCheck (result : CheckResult) : String :=
   let status := if result.passed then "[PASS]" else "[FAIL]"
-  let line := s!"  {status} {result.name}"
+  let line := s!"    {status} {result.name}"
 
   if result.passed then
     line ++ "\n"
   else
-    let detailLines := result.details.map (s!"         " ++ ·)
+    let detailLines := result.details.map (s!"           " ++ ·)
     line ++ "\n" ++ String.intercalate "\n" detailLines ++
     (if detailLines.isEmpty then "" else "\n")
 
-/-- Format all check results -/
+/-- Group checks by category and format -/
 def formatChecks (checks : List CheckResult) : String :=
   let header := "\nCHECKS\n" ++ thinDivider ++ "\n"
-  let body := String.intercalate "" (checks.map formatCheck)
+
+  -- Group checks by category
+  let categories := [CheckCategory.structure, CheckCategory.soundness,
+                     CheckCategory.contentRules, CheckCategory.imports]
+
+  let formatCategory (cat : String) : String :=
+    let categoryChecks := checks.filter (·.category == cat)
+    if categoryChecks.isEmpty then ""
+    else
+      s!"  {cat}\n" ++ String.intercalate "" (categoryChecks.map formatCheck) ++ "\n"
+
+  let body := String.intercalate "" (categories.map formatCategory)
   header ++ body
+
+/-- Format warnings section -/
+def formatWarnings (warnings : List String) : String :=
+  if warnings.isEmpty then ""
+  else
+    let header := "WARNINGS (requires extra review)\n" ++ thinDivider ++ "\n"
+    let body := String.intercalate "\n" warnings
+    let footer := "\n\n  These don't fail verification but could affect MainTheorem.lean semantics.\n"
+    header ++ body ++ footer
 
 /-- Format the final result -/
 def formatResult (allPassed : Bool) : String :=
@@ -122,7 +142,6 @@ def formatResult (allPassed : Bool) : String :=
     "\n" ++ divider ++ "\n" ++
     "RESULT: PROJECT MEETS TEMPLATE EXPECTATIONS\n" ++
     "\nThis project meets the TAIL Standard for AI-generated formal proofs.\n" ++
-    "A human reviewer only needs to verify MainTheorem.lean to trust the result.\n" ++
     divider ++ "\n"
   else
     "\n" ++ divider ++ "\n" ++
@@ -134,8 +153,9 @@ def formatResult (allPassed : Bool) : String :=
 /-- Format a complete verification report -/
 def formatReport (report : VerificationReport) : String :=
   formatHeader report.projectName ++
-  formatTierSummary report.stats ++
+  formatTierSummary report.mode report.stats ++
   formatChecks report.checks ++
+  formatWarnings report.warnings ++
   formatResult report.allPassed
 
 /-! ## JSON Output -/
@@ -152,8 +172,7 @@ private def reviewPercentage (stats : ProjectStats) : Float :=
 def formatReportJson (report : VerificationReport) : String :=
   let result := if report.allPassed then "VERIFIED" else "FAILED"
   let pct := reviewPercentage report.stats
-  let hasDefinitions := report.stats.definitions.lineCount > 0
-  let standardName := if hasDefinitions then "TAIL Standard (Extended)" else "TAIL Standard (Strict)"
+  let standardName := if report.mode == .strict then "TAIL Standard (Strict)" else "TAIL Standard (Extended)"
 
   -- Build enhanced JSON structure
   let json := Json.mkObj [
@@ -171,6 +190,7 @@ def formatReportJson (report : VerificationReport) : String :=
       ("review_percentage", toJson pct)
     ]),
     ("checks", toJson report.checks),
+    ("warnings", toJson report.warnings),
     ("all_passed", toJson report.allPassed)
   ]
 

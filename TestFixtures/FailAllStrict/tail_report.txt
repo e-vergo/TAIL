@@ -1,0 +1,59 @@
+================================================================================
+TAIL STANDARD COMPLIANCE REPORT
+Project: FailAllStrict
+Tool: TAIL v0.1
+================================================================================
+
+TRUST TIER SUMMARY (STRICT TAIL STANDARD)
+--------------------------------------------------------------------------------
+  [HUMAN REVIEW]
+    MainTheorem.lean                            29 lines
+  [MACHINE VERIFIED]
+    ProofOfMainTheorem.lean                     21 lines
+    Proofs/ (1 files)                         42 lines
+--------------------------------------------------------------------------------
+  REVIEW BURDEN: 29 lines (MainTheorem.lean only)
+  TOTAL: 92 lines (31% requires review)
+
+CHECKS
+--------------------------------------------------------------------------------
+  Structure
+    [PASS] Structure
+
+  Soundness
+    [FAIL] Soundness
+             - FailAllStrict.ProofOfMainTheorem: FailAllStrict.mainTheorem (sorry)
+             - FailAllStrict.ProofOfMainTheorem: FailAllStrict.extraTheorem (trivial True)
+             - FailAllStrict.MainTheorem: FailAllStrict.badTheorem (trivial True)
+    [FAIL] Axioms in Source
+             - FailAllStrict/Proofs/BadHelper.lean:29: axiom math_is_hard : 1 + 2 = 4
+    [FAIL] Opaques in Source
+             - FailAllStrict/Proofs/BadHelper.lean:32: opaque opaqueViolation : Nat
+    [FAIL] Unsafe Attributes
+             - FailAllStrict/Proofs/BadHelper.lean:36: implemented_by (@[implemented_by implFunc])
+
+  Content Rules
+    [FAIL] ProofOfMainTheorem Isolation
+           Multiple theorems/axioms found (3):
+             - theorem FailAllStrict.mainTheorem
+             - theorem FailAllStrict.anotherExtraTheorem
+             - theorem FailAllStrict.extraTheorem
+    [FAIL] MainTheorem Isolation
+           ERROR: axiom FailAllStrict.badTheorem (axioms not allowed in MainTheorem.lean)
+           ERROR: FailAllStrict.ExtraDefinition (strict mode allows only StatementOfTheorem)
+    [FAIL] Proofs Content
+             - structure/inductive FailAllStrict.BadStructure (not allowed in Proofs/)
+    [PASS] Definitions Content
+
+  Import Discipline
+    [FAIL] Import Discipline
+           MainTheorem.lean import violations:
+             - FailAllStrict.Proofs.BadHelper (project import not allowed)
+
+
+================================================================================
+RESULT: PROJECT FAILS TO MEET TEMPLATE EXPECTATIONS
+
+Please fix the issues above before requesting review.
+================================================================================
+

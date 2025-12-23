@@ -6,6 +6,7 @@ Authors: Eric Hearn
 import Lean
 import TAIL.Types
 import TAIL.Config
+import TAIL.Utils
 
 /-!
 # TAIL Olean Reader
@@ -79,6 +80,8 @@ structure OleanDeclInfo where
   type : Expr
   /-- Direct dependencies (constants used in type and value) -/
   usedConstants : Array Name
+  /-- Definition safety level (partial, unsafe, safe) - only for definitions -/
+  safety : Option DefinitionSafety := none
   deriving Inhabited
 
 instance : ToString OleanDeclInfo where
@@ -87,10 +90,14 @@ instance : ToString OleanDeclInfo where
 /-- Extract OleanDeclInfo from a ConstantInfo -/
 def OleanDeclInfo.fromConstantInfo (info : ConstantInfo) : OleanDeclInfo :=
   let usedConstants := info.getUsedConstantsAsSet.toArray
+  let safety := match info with
+    | .defnInfo defVal => some defVal.safety
+    | _ => none
   { name := info.name
     kind := DeclKind.fromConstantInfo info
     type := info.type
-    usedConstants := usedConstants }
+    usedConstants := usedConstants
+    safety := safety }
 
 /-! ## Olean Module Info -/
 
@@ -168,21 +175,6 @@ def readOleanModuleFromProject (projectRoot : System.FilePath) (moduleName : Nam
 
 /-! ## Project Module Discovery -/
 
-/-- Discover all Lean source files in a directory recursively.
-    Returns paths relative to the given directory.
-    Excludes lakefile.lean which is a Lake config file, not a module. -/
-private partial def discoverLeanFiles (dir : System.FilePath) : IO (Array System.FilePath) := do
-  let mut files : Array System.FilePath := #[]
-  if !(← dir.pathExists) then return files
-  for entry in (← dir.readDir) do
-    let path := entry.path
-    if (← path.isDir) then
-      let subFiles ← discoverLeanFiles path
-      files := files ++ subFiles
-    else if path.extension == some "lean" && entry.fileName != "lakefile.lean" then
-      files := files.push path
-  return files
-
 /-- Convert a file path to a module name.
     E.g., `./Example/MainTheorem.lean` with prefix `Example` -> `Example.MainTheorem` -/
 private def filePathToModuleName (projectRoot : System.FilePath) (projectPrefix : String) (filePath : System.FilePath) : Option Name := do
@@ -201,7 +193,7 @@ private def filePathToModuleName (projectRoot : System.FilePath) (projectPrefix 
 /-- Get all module names from a ResolvedConfig.
     Discovers all .lean files in the project source directory. -/
 def discoverProjectModules (resolved : ResolvedConfig) : IO (Array Name) := do
-  let leanFiles ← discoverLeanFiles resolved.sourcePath
+  let leanFiles ← TAIL.discoverLeanFiles resolved.sourcePath
   let moduleNames := leanFiles.filterMap (filePathToModuleName resolved.projectRoot resolved.projectPrefix ·)
   return moduleNames
 
@@ -228,10 +220,6 @@ def readProjectModules (resolved : ResolvedConfig) : IO (Array OleanModuleInfo) 
   return modules
 
 /-! ## Utility Functions -/
-
-/-- Check if a string contains a substring -/
-private def strContains (s : String) (sub : String) : Bool :=
-  (s.splitOn sub).length > 1
 
 /-- Check if a declaration uses sorry.
     Checks if `sorryAx` is in the direct dependencies. -/
@@ -262,9 +250,9 @@ def OleanModuleInfo.userDeclarations (info : OleanModuleInfo) : Array OleanDeclI
 /-- Check if a declaration is internal/auxiliary -/
 def OleanDeclInfo.isInternal (decl : OleanDeclInfo) : Bool :=
   decl.name.isInternal ||
-  strContains decl.name.toString "._" ||
-  strContains decl.name.toString ".match_" ||
-  strContains decl.name.toString ".proof_"
+  TAIL.containsSubstr decl.name.toString "._" ||
+  TAIL.containsSubstr decl.name.toString ".match_" ||
+  TAIL.containsSubstr decl.name.toString ".proof_"
 
 /-- Get non-internal declarations from a module -/
 def OleanModuleInfo.publicDeclarations (info : OleanModuleInfo) : Array OleanDeclInfo :=

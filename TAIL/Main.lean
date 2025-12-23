@@ -7,7 +7,7 @@ import TAIL.Types
 import TAIL.Config
 import TAIL.FileUtils
 import TAIL.Report
-import TAIL.FastChecks
+import TAIL.Checks
 
 /-!
 # TAIL Main
@@ -69,15 +69,17 @@ def collectStats (resolved : ResolvedConfig) : IO ProjectStats := do
 
 /-! ## Check Orchestration -/
 
-/-- Run all checks and build report using the fast olean-based reader -/
+/-- Run all checks and build report using the olean-based reader -/
 def runVerification (resolved : ResolvedConfig) : IO VerificationReport := do
-  let checks ← FastChecks.runFastChecks resolved
+  let (checks, warnings) ← Checks.runChecks resolved
   let stats ← collectStats resolved
   let allPassed := checks.all (·.passed)
 
   return {
     projectName := resolved.projectPrefix
+    mode := resolved.mode
     checks := checks
+    warnings := warnings
     stats := stats
     allPassed := allPassed
   }
@@ -156,7 +158,7 @@ def main (args : List String) : IO UInt32 := do
     return (2 : UInt32)  -- Exit code 2 for config error
   | .ok resolved =>
     try
-      -- Run verification using fast olean-based checks (no environment loading needed)
+      -- Run verification using olean-based checks (no environment loading needed)
       let report ← runVerification resolved
 
       -- Print to console

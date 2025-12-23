@@ -56,6 +56,23 @@ lemma sum_cubes_eq (n : ℕ) :
     rw [sum_range_succ, ih]
     exact sum_cubes_step n
 
+/-! ## False-Negative Tests
+
+These tests verify that keywords in comments and names don't trigger false positives.
+-/
+
+/-- Documentation mentioning axiom, sorry, opaque should be ignored.
+    This is pure math, no actual axioms or sorry used here. -/
+def false_negative_test : Prop := True
+
+-- Comment: axiom bad : 1 = 2
+-- Comment: sorry
+-- Comment: opaque sneaky : Nat
+-- Comment: unsafe def evil : Nat
+
+/-- Prop-valued helper with keyword in name -/
+def sorry_not_used : Prop := 1 = 1
+
 end
 
 end PassAllStrict

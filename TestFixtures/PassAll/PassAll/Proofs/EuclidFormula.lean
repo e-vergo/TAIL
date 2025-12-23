@@ -26,6 +26,25 @@ lemma euclid_identity_nat {m n : ℕ} (h : n < m) :
   zify [hle]
   ring
 
+/-! ## False-Negative Tests
+
+These tests verify that keywords in comments, strings, and names don't trigger
+false positives from the source-based checks.
+-/
+
+/-- This helper doesn't use any axiom or sorry - just pure math.
+    The word "axiom" in this comment should be ignored.
+    Similarly, "sorry" and "opaque" and "unsafe" are just words here. -/
+def axiom_mention_helper : Prop := True
+
+-- Comment: axiom bad : 1 = 2
+-- Comment: sorry
+-- Comment: opaque sneaky : Nat
+-- Comment: unsafe def evil : Nat := 42
+
+/-- A string containing keywords should not trigger detection -/
+def string_with_keywords : String := "axiom sorry opaque unsafe native_decide implemented_by"
+
 end
 
 end PassAll

@@ -43,4 +43,20 @@ def getModuleImports (env : Environment) (moduleName : Name) : Option (Array Imp
   let moduleData := env.header.moduleData[idx.toNat]?
   return moduleData.map (·.imports) |>.getD #[]
 
+/-! ## File Discovery -/
+
+/-- Discover all Lean source files in a directory recursively.
+    Excludes lakefile.lean. Returns absolute paths. -/
+partial def discoverLeanFiles (dir : System.FilePath) : IO (Array System.FilePath) := do
+  let mut files : Array System.FilePath := #[]
+  if !(← dir.pathExists) then return files
+  for entry in (← dir.readDir) do
+    let path := entry.path
+    if (← path.isDir) then
+      let subFiles ← discoverLeanFiles path
+      files := files ++ subFiles
+    else if path.extension == some "lean" && entry.fileName != "lakefile.lean" then
+      files := files.push path
+  return files
+
 end TAIL
