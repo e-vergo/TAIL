@@ -6,7 +6,7 @@
 
 The TAIL Standard addresses a fundamental challenge: how can humans trust AI-generated mathematical proofs? While Lean's type checker guarantees logical validity, a malicious or confused AI could prove something trivially true while appearing to prove something meaningful.
 
-[TAIL was proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/near/556956052) as a strict solution:
+[TAIL was proposed](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.20proofs/near/556956070) as a strict solution:
 
 > Projects "don't count" unless:
 > - They contain a file `MainTheorem.lean`, which has **no imports outside of Mathlib**, and contains the main result as `def StatementOfTheorem : Prop := ...`
