@@ -60,6 +60,8 @@ structure ResolvedConfig where
   definitionsPath : Option System.FilePath
   /-- Absolute path to Proofs/ folder (optional) -/
   proofsPath : Option System.FilePath
+  /-- Skip sorry checking (for vibe-proving workflows) -/
+  skipSorryCheck : Bool := false
   deriving Inhabited, Repr
 
 /-- Parse a dot-separated string into a hierarchical Name -/
@@ -115,18 +117,18 @@ def extractProjectPrefix (projectRoot : System.FilePath) : IO (Except String Str
     -- Parse TOML format: name = "ProjectName"
     let content ← IO.FS.readFile tomlPath
     for line in content.splitOn "\n" do
-      let trimmed := line.trimAscii
+      let trimmed := line.trim
       if trimmed.startsWith "name = " then
         let rest := trimmed.drop 7  -- "name = ".length
-        let name := rest.trimAscii.dropWhile (· == '"') |> (·.dropEndWhile (· == '"'))
+        let name := rest.trim.replace "\"" ""
         if name.isEmpty then continue
-        return .ok name.toString
+        return .ok name
     return .error "Could not find 'name = \"...\"' in lakefile.toml"
 
   -- Parse lakefile.lean: package <Name> where or package "Name" where
   let content ← IO.FS.readFile lakefilePath
   for line in content.splitOn "\n" do
-    let trimmed := line.trimAscii
+    let trimmed := line.trim
     if trimmed.startsWith "package " then
       let rest := trimmed.drop 8  -- "package ".length
       let name := rest.takeWhile (fun c => c != ' ' && c != '\n')

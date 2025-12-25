@@ -13,7 +13,7 @@ ProjectName/
 │   ├── ProofOfMainTheorem.lean     [MACHINE VERIFIED]
 │   └── Proofs/                     [MACHINE VERIFIED]
 │       └── Helpers.lean
-├── lakefile.lean
+├── lakefile.toml
 └── lean-toolchain
 ```
 
@@ -26,7 +26,7 @@ ProjectName/
 │   ├── ProofOfMainTheorem.lean     [MACHINE VERIFIED]
 │   └── Proofs/                     [MACHINE VERIFIED]
 │       └── Helpers.lean
-├── lakefile.lean
+├── lakefile.toml
 └── lean-toolchain
 ```
 
@@ -43,7 +43,7 @@ All names are hardcoded per the TAIL Standard:
 | `ProjectName.StatementOfTheorem` | The proposition being proven |
 | `ProjectName.mainTheorem` | The theorem proving it |
 
-The project prefix is auto-detected from `lakefile.lean`.
+The project prefix is auto-detected from `lakefile.toml` (or `lakefile.lean`).
 
 ## Example Files
 
@@ -159,7 +159,7 @@ end MyProject
 
 ### Module Declaration
 
-All files start with `module` to enable Lean 4.27+ module system features.
+All files start with `module` to enable Lean 4.26+ module system features (requires `set_option experimental.module true` in lakefile).
 
 ### Public vs Private Imports
 

@@ -47,7 +47,7 @@ private def formatNumber (n : Nat) : String :=
 /-- Get current timestamp -/
 private def getTimestamp : IO String := do
   let output ← IO.Process.output { cmd := "date", args := #["+%Y-%m-%d %H:%M:%S"] }
-  return output.stdout.trimAscii.toString
+  return output.stdout.trim
 
 /-- Format the header -/
 def formatHeader (projectName : String) : String :=

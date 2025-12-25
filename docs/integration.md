@@ -20,23 +20,23 @@ lake exe tailverify --strict /path/to/your/project
 
 ## Option 2: Add as Dependency
 
-Add TAIL as a dependency in your project's `lakefile.lean`:
+Add TAIL as a dependency in your project's `lakefile.toml`:
 
-```lean
-import Lake
-open Lake DSL
+```toml
+name = "MyProject"
+version = "0.1.0"
+defaultTargets = ["MyProject"]
 
-package MyProject where
-  version := v!"0.1.0"
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
 
-require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git"
+[[require]]
+name = "TAIL"
+git = "https://github.com/e-vergo/TAIL.git"
 
-require TAIL from git
-  "https://github.com/e-vergo/TAIL.git"
-
-@[default_target]
-lean_lib MyProject where
+[[lean_lib]]
+name = "MyProject"
 ```
 
 Then run:

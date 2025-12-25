@@ -5,7 +5,7 @@ Authors: Eric Hearn
 -/
 import TAIL.Types
 import TAIL.Config
-import TAIL.FileUtils
+import TAIL.Utils
 import TAIL.Report
 import TAIL.Checks
 
@@ -94,6 +94,7 @@ structure CLIArgs where
   generateReport : Bool := false  -- Auto-generate compliance report file
   projectPrefix : Option String := none  -- Override auto-detected prefix
   mode : VerificationMode := .default  -- Verification mode
+  skipSorryCheck : Bool := false  -- Skip sorry checking (for vibe-proving)
   deriving Repr
 
 /-- Parse command line arguments -/
@@ -110,6 +111,8 @@ def parseArgs (args : List String) : IO CLIArgs := do
       result := { result with format := .text }
     else if arg == "--strict" then
       result := { result with mode := .strict }
+    else if arg == "--skip-sorry" then
+      result := { result with skipSorryCheck := true }
     else if arg == "--report" || arg == "-r" then
       result := { result with generateReport := true }
     else if arg == "--output" || arg == "-o" then
@@ -129,13 +132,14 @@ def parseArgs (args : List String) : IO CLIArgs := do
       IO.println "  directory    Project root (default: current directory)"
       IO.println ""
       IO.println "Options:"
-      IO.println "  --strict     Strict mode: original TAIL Standard (no Definitions/ folder)"
-      IO.println "  -p, --prefix Override project prefix (default: auto-detect from lakefile)"
-      IO.println "  --json       Output in JSON format"
-      IO.println "  --text       Output in text format (default)"
-      IO.println "  -r, --report Generate tail_compliance_report.txt in project root"
-      IO.println "  -o, --output Write output to FILE"
-      IO.println "  -h, --help   Show this help"
+      IO.println "  --strict      Strict mode: original TAIL Standard (no Definitions/ folder)"
+      IO.println "  --skip-sorry  Skip sorry checking (for vibe-proving workflows)"
+      IO.println "  -p, --prefix  Override project prefix (default: auto-detect from lakefile)"
+      IO.println "  --json        Output in JSON format"
+      IO.println "  --text        Output in text format (default)"
+      IO.println "  -r, --report  Generate tail_compliance_report.txt in project root"
+      IO.println "  -o, --output  Write output to FILE"
+      IO.println "  -h, --help    Show this help"
       IO.Process.exit 0
     else if !arg.startsWith "-" then
       result := { result with projectRoot := arg }
@@ -157,6 +161,8 @@ def main (args : List String) : IO UInt32 := do
     IO.eprintln s!"Error: {e}"
     return (2 : UInt32)  -- Exit code 2 for config error
   | .ok resolved =>
+    -- Apply CLI flags to resolved config
+    let resolved := { resolved with skipSorryCheck := cliArgs.skipSorryCheck }
     try
       -- Run verification using olean-based checks (no environment loading needed)
       let report ← runVerification resolved

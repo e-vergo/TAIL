@@ -105,8 +105,8 @@ def checkSoundness (resolved : ResolvedConfig) (modules : Array OleanModuleInfo)
       let declModule := mod.name.toString
       let declFullName := s!"{declModule}: {decl.name}"
 
-      -- 1. Check for sorry usage
-      if decl.usesSorry then
+      -- 1. Check for sorry usage (unless skipped)
+      if !resolved.skipSorryCheck && decl.usesSorry then
         violations := violations.push s!"  - {declFullName} (sorry)"
 
       -- 2. Check for native_decide usage
@@ -139,7 +139,7 @@ def checkSoundness (resolved : ResolvedConfig) (modules : Array OleanModuleInfo)
 /-- Check if a trimmed line contains an axiom declaration.
     Returns (isAxiom, axiomDeclaration) where axiomDeclaration is the full line text if it's an axiom. -/
 private def isAxiomLine (line : String) : Bool × String :=
-  let trimmed := line.trimAscii.toString
+  let trimmed := line.trim
   -- Check for "axiom " or "private axiom " at the start
   if trimmed.startsWith "axiom " then
     (true, trimmed)
@@ -156,7 +156,7 @@ private def isCommentedOut (line : String) : Bool :=
   | [_] => false  -- No "--" found
   | beforeComment :: _ =>
     -- Check if "axiom" appears before the comment marker
-    !(beforeComment.contains "axiom")
+    !(beforeComment.containsSubstr "axiom")
 
 /-- Scan all .lean files in the project source directory for axiom declarations.
     Reports file path, line number, and axiom declaration for each violation. -/
@@ -194,7 +194,7 @@ def checkAxiomsInSource (resolved : ResolvedConfig) : IO CheckResult := do
 /-- Check if a trimmed line contains an unsafe attribute.
     Returns (hasUnsafe, attributeName, fullLine). -/
 private def isUnsafeAttributeLine (line : String) : Bool × String × String :=
-  let trimmed := line.trimAscii.toString
+  let trimmed := line.trim
   if trimmed.startsWith "@[implemented_by" then
     (true, "implemented_by", trimmed)
   else if trimmed.startsWith "@[extern" then
@@ -217,7 +217,7 @@ def checkUnsafeAttributesInSource (resolved : ResolvedConfig) : IO CheckResult :
       lineNumber := lineNumber + 1
 
       -- Skip if line starts with comment
-      let trimmed := line.trimAscii.toString
+      let trimmed := line.trim
       if trimmed.startsWith "--" then continue
 
       let (hasUnsafe, attrName, fullLine) := isUnsafeAttributeLine line
@@ -238,7 +238,7 @@ def checkUnsafeAttributesInSource (resolved : ResolvedConfig) : IO CheckResult :
 /-- Check if a trimmed line contains an opaque declaration.
     Returns (isOpaque, declaration) where declaration is the line text. -/
 private def isOpaqueLine (line : String) : Bool × String :=
-  let trimmed := line.trimAscii.toString
+  let trimmed := line.trim
   if trimmed.startsWith "opaque " then
     (true, trimmed)
   else if trimmed.startsWith "private opaque " then
@@ -261,7 +261,7 @@ def checkOpaquesInSource (resolved : ResolvedConfig) : IO CheckResult := do
       lineNumber := lineNumber + 1
 
       -- Skip if line starts with comment
-      let trimmed := line.trimAscii.toString
+      let trimmed := line.trim
       if trimmed.startsWith "--" then continue
 
       let (isOpaque, opaqueDecl) := isOpaqueLine line

@@ -184,7 +184,7 @@ private def filePathToModuleName (projectRoot : System.FilePath) (projectPrefix 
   guard (fileStr.startsWith rootStr)
   let relPath := fileStr.drop (rootStr.length + 1)  -- +1 for separator
   -- Remove .lean extension and convert / to .
-  let withoutExt := relPath.dropEnd 5  -- ".lean".length
+  let withoutExt := relPath.dropRight 5  -- ".lean".length
   let moduleName := withoutExt.replace "/" "."
   -- Only include if it starts with project prefix
   guard (moduleName.startsWith projectPrefix)
@@ -225,9 +225,6 @@ def readProjectModules (resolved : ResolvedConfig) : IO (Array OleanModuleInfo) 
     Checks if `sorryAx` is in the direct dependencies. -/
 def OleanDeclInfo.usesSorry (decl : OleanDeclInfo) : Bool :=
   decl.usedConstants.contains ``sorryAx
-
-/-- Alias for backwards compatibility -/
-def usesSorry (decl : OleanDeclInfo) : Bool := decl.usesSorry
 
 /-- Check if a name is from the project (not Mathlib/Init/etc).
     Uses the project prefix to determine project membership. -/

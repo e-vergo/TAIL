@@ -15,6 +15,7 @@ lake exe tailverify [directory] [options]
 | Option | Description |
 |--------|-------------|
 | `--strict` | Strict mode: no Definitions/ folder allowed |
+| `--skip-sorry` | Skip sorry checking (for vibe-proving workflows) |
 | `--json` | Output in JSON format |
 | `--text` | Output in text format (default) |
 | `-r, --report` | Generate `tail_compliance_report.txt` in project root |
@@ -92,7 +93,7 @@ MyTheorem/
 │   ├── ProofOfMainTheorem.lean
 │   └── Proofs/
 │       └── Support.lean
-├── lakefile.lean
+├── lakefile.toml
 └── lean-toolchain
 ```
 
@@ -104,7 +105,7 @@ MyTheorem/
 │   ├── ProofOfMainTheorem.lean
 │   └── Proofs/
 │       └── Support.lean
-├── lakefile.lean
+├── lakefile.toml
 └── lean-toolchain
 ```
 

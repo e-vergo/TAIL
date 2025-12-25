@@ -26,7 +26,7 @@ ProjectName/
 │   │   └── Types.lean
 │   └── Proofs/
 │       └── Support.lean
-├── lakefile.lean
+├── lakefile.toml
 └── lean-toolchain
 ```
 
@@ -38,7 +38,7 @@ ProjectName/
 │   ├── ProofOfMainTheorem.lean
 │   └── Proofs/
 │       └── Support.lean
-├── lakefile.lean
+├── lakefile.toml
 └── lean-toolchain
 ```
 -/
@@ -157,28 +157,20 @@ end
 end {projectName}
 "
 
-/-- Generate lakefile.lean content -/
+/-- Generate lakefile.toml content -/
 def lakefileContent (projectName : String) : String :=
-s!"import Lake
-open Lake DSL
+s!"name = \"{projectName}\"
+version = \"0.1.0\"
+defaultTargets = [\"{projectName}\"]
 
-package {projectName} where
-  version := v!\"0.1.0\"
-  leanOptions := #[
-    ⟨`pp.unicode.fun, true⟩,
-    ⟨`relaxedAutoImplicit, false⟩
-    -- Note: experimental.module is no longer required as of Lean 4.27+
-  ]
+[[require]]
+name = \"mathlib\"
+git = \"https://github.com/leanprover-community/mathlib4.git\"
+rev = \"v4.26.0\"
 
-require mathlib from git
-  \"https://github.com/leanprover-community/mathlib4.git\"
-
-require lean4checker from git
-  \"https://github.com/leanprover/lean4checker\"
-
-@[default_target]
-lean_lib {projectName} where
-  -- Library sources
+[[lean_lib]]
+name = \"{projectName}\"
+globs = [\"{projectName}.+\"]
 "
 
 /-- Generate lean-toolchain content -/
@@ -234,8 +226,8 @@ def scaffold (projectPath : String) (strictMode : Bool) : IO Unit := do
     IO.println s!"  {projectName}/{projectName}/Definitions/Types.lean"
 
   -- Config files
-  writeFile (projectDir / "lakefile.lean") (lakefileContent projectName)
-  IO.println s!"  {projectName}/lakefile.lean"
+  writeFile (projectDir / "lakefile.toml") (lakefileContent projectName)
+  IO.println s!"  {projectName}/lakefile.toml"
 
   writeFile (projectDir / "lean-toolchain") toolchainContent
   IO.println s!"  {projectName}/lean-toolchain"

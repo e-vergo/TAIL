@@ -1,4 +1,2 @@
 .lake/
-lake-manifest.json
 .DS_Store
-test_fixtures.sh

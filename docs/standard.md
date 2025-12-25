@@ -69,7 +69,7 @@ lake exe tailscaffold MyProject
 
 ## Module System
 
-TAIL leverages Lean 4.27+'s module system to enforce isolation:
+TAIL leverages Lean 4.26+'s module system (with `set_option experimental.module true`) to enforce isolation:
 
 ```lean
 -- ProofOfMainTheorem.lean

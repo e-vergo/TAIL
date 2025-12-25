@@ -86,8 +86,8 @@ def checkProofsContent (resolved : ResolvedConfig) (modules : Array OleanModuleI
       -- Skip structures (already handled above)
       if decl.kind == .ind then continue
 
-      -- Check for sorry usage
-      if decl.usesSorry then
+      -- Check for sorry usage (unless skipped)
+      if !resolved.skipSorryCheck && decl.usesSorry then
         allViolations := allViolations.push s!"  - {decl.name} uses sorry in {mod.name}"
 
       -- Check for defs without proof obligation (must return Prop)
@@ -184,7 +184,7 @@ private def semanticRiskPatterns : List (String × String) :=
 /-- Check if a line contains a semantic risk pattern.
     Returns (hasRisk, patternName) if found. -/
 private def hasSemanticRisk (line : String) : Option String := Id.run do
-  let trimmed := line.trimAscii.toString
+  let trimmed := line.trim
   -- Skip comments
   if trimmed.startsWith "--" then return none
   -- Skip lines inside doc comments
@@ -194,8 +194,8 @@ private def hasSemanticRisk (line : String) : Option String := Id.run do
     if trimmed.startsWith pattern then
       -- Special case: "instance" should only warn if it's a Coe instance
       if pattern == "instance" then
-        if trimmed.contains "Coe" || trimmed.contains "CoeT" ||
-           trimmed.contains "CoeTC" || trimmed.contains "CoeFun" then
+        if trimmed.containsSubstr "Coe" || trimmed.containsSubstr "CoeT" ||
+           trimmed.containsSubstr "CoeTC" || trimmed.containsSubstr "CoeFun" then
           return some "coercion instance"
         else
           continue

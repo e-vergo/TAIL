@@ -34,15 +34,6 @@ def isStandardLibraryImport (moduleName : Name) : Bool :=
   let nameStr := moduleName.toString
   standardLibraryPrefixes.any (nameStr.startsWith ·)
 
-/-! ## Module Introspection -/
-
-/-- Get imports for a specific module from the environment.
-    Returns `none` if the module is not found. -/
-def getModuleImports (env : Environment) (moduleName : Name) : Option (Array Import) := do
-  let idx ← env.getModuleIdx? moduleName
-  let moduleData := env.header.moduleData[idx.toNat]?
-  return moduleData.map (·.imports) |>.getD #[]
-
 /-! ## File Discovery -/
 
 /-- Discover all Lean source files in a directory recursively.
@@ -58,5 +49,15 @@ partial def discoverLeanFiles (dir : System.FilePath) : IO (Array System.FilePat
     else if path.extension == some "lean" && entry.fileName != "lakefile.lean" then
       files := files.push path
   return files
+
+/-! ## Line Counting -/
+
+/-- Count lines in a file (for statistics only) -/
+def countLines (path : System.FilePath) : IO Nat := do
+  try
+    let content ← IO.FS.readFile path
+    return (content.splitOn "\n").length
+  catch _ =>
+    return 0
 
 end TAIL

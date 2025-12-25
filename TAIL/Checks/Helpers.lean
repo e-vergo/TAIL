@@ -7,6 +7,7 @@ import TAIL.OleanReader
 import TAIL.Types
 import TAIL.Config
 import TAIL.Utils
+import Batteries.Data.String.Matcher
 
 /-!
 # TAIL Checks - Helpers
