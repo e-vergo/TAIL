@@ -2,9 +2,9 @@
   "mcpServers": {
     "lean-lsp": {
       "type": "stdio",
-      "command": "uvx",
+      "command": "/Users/eric/.local/bin/uvx",
       "args": [
-        "lean-lsp"
+        "lean-lsp-mcp"
       ],
       "env": {}
     }
