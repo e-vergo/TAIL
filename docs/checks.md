@@ -1,98 +1,114 @@
 # Verification Checks
 
-TAIL performs 10 verification checks organized into four categories.
+TAIL performs 3 core verification checks plus an optional SafeVerify check for kernel-level verification.
 
-## Structure
+## Trust Tier Model
 
-| Check | Description |
-|-------|-------------|
-| **Structure** | `ProjectName.StatementOfTheorem : Prop` and `ProjectName.mainTheorem` exist |
+TAIL enforces a two-tier trust model:
 
-The Structure check verifies that the required declarations exist and have correct types.
+| Tier | Files | Constraint |
+|------|-------|------------|
+| **Human Review** | MainTheorem.lean, Definitions/ | No restrictions - reviewer checks all of this |
+| **Machine Verified** | ProofOfMainTheorem.lean, Proofs/ | Only Prop-valued declarations allowed |
 
-## Soundness
+The key insight: non-Prop declarations (structures, inductives, data-returning defs) **must** be in the human-review tier. This ensures that anything in the machine-verified tier can be trusted without human review.
 
-| Check | Description |
-|-------|-------------|
-| **Soundness** | No uses of `sorry`, `native_decide`, trivial `True`, or `partial`/`unsafe` defs |
-| **Axioms in Source** | No `axiom` declarations |
-| **Opaques in Source** | No `opaque` declarations |
-| **Unsafe Attributes** | No `@[implemented_by]` or `@[extern]`|
+## Core Checks
 
-### Soundness Details
-
-The main Soundness check detects:
-- `sorry` - Incomplete proofs
-- `native_decide` - Unverified computational decisions
-- Trivial `True` proofs - Proving something meaningless
-- `partial def` - Non-termination risk
-- `unsafe def` - Bypasses type checker
-
-### Source-Based Checks
-
-Axioms, Opaques, and Unsafe Attributes are detected by scanning source files directly. This is necessary because Lean's module system stores `public section` declarations as axioms in `.olean` files.
-
-## Content Rules
+### 1. Structure
 
 | Check | Description |
 |-------|-------------|
-| **ProofOfMainTheorem Isolation** | Exposes exactly one public theorem |
-| **MainTheorem Isolation** | Contains no theorems (only definitions) |
-| **Proofs Content** | Contains only lemmas and Prop-valued definitions |
-| **Definitions Content** | Contains defs, structures, and theorems |
+| **Structure** | Required declarations exist with correct types |
 
-### ProofOfMainTheorem Isolation
+Verifies:
+- `ProjectName.StatementOfTheorem` exists as a `def` in MainTheorem.lean
+- `ProjectName.mainTheorem` exists as a `theorem` in ProofOfMainTheorem.lean
 
-`ProofOfMainTheorem.lean` must expose exactly one theorem: `mainTheorem`. Additional theorems would leak proof machinery into the public API.
-
-### MainTheorem Isolation
-
-`MainTheorem.lean` should contain only the `StatementOfTheorem` definition. Theorems are not allowed because they would require proof code in the human-review tier.
-
-### Proofs Content
-
-Files in `Proofs/` may only contain:
-- Lemmas (theorem declarations)
-- Prop-valued definitions
-
-Structures, inductives, and non-Prop defs belong in `Definitions/`.
-
-### Definitions Content
-
-Files in `Definitions/` may contain:
-- Definitions (`def`)
-- Structures and inductives
-- Theorems (for dependent types)
-- Notations and macros (generates a warning)
-
-## Import Discipline
+### 2. Trust Tier
 
 | Check | Description |
 |-------|-------------|
-| **Import Discipline** | MainTheorem.lean only imports Mathlib (strict) or Mathlib + Definitions/ (default) |
+| **Trust Tier** | Machine-verified tier contains only Prop-valued declarations |
 
-This ensures the theorem statement's semantics are clear:
-- **Strict mode**: Only Mathlib imports allowed
-- **Default mode**: Mathlib + project's own `Definitions/` imports allowed
+The machine-verified tier (ProofOfMainTheorem.lean + Proofs/) may only contain:
+- Theorems (inherently Prop-valued)
+- Prop-valued definitions (e.g., `def myProp : Prop := ...`)
+
+The following are **rejected** in the machine-verified tier:
+- Structures and inductives (use Definitions/ instead)
+- Data-returning definitions (e.g., `def compute : Nat := ...`)
+
+This is the core enforcement mechanism: if you want to define data types or non-Prop defs, they must go in the human-review tier where a reviewer will examine them.
+
+### 3. Import Discipline
+
+| Check | Description |
+|-------|-------------|
+| **Import Discipline** | MainTheorem.lean only imports approved sources |
+
+Controls what MainTheorem.lean can import:
+- **Strict mode** (`--strict`): Only Mathlib imports allowed
+- **Default mode**: Mathlib + project's Definitions/ imports allowed
+
+This ensures the theorem statement's semantics are clear and verifiable.
 
 ## Verification Architecture
 
-TAIL uses a hybrid approach:
+TAIL reads compiled `.olean` files directly for fast verification (~1 second) without importing the full project environment. This approach:
 
-### Olean-Based Checks
-- Structure, Soundness, Isolation, Content, Import checks
-- Reads compiled `.olean` files directly
-- Fast verification (~1 second) without importing the project
-
-### Source-Based Checks
-- Axiom, Opaque, Unsafe Attribute detection
-- Scans `.lean` source files with regex patterns
-- Necessary because olean files don't distinguish user axioms from module system axioms
+1. Extracts declaration metadata (names, types, kinds) from olean files
+2. Uses type information to determine if declarations are Prop-valued
+3. Analyzes import graphs to verify import discipline
 
 ## Warnings
 
-In addition to pass/fail checks, TAIL generates warnings for:
-- Custom `notation` in Definitions/
-- `macro` definitions in Definitions/
+In addition to pass/fail checks, TAIL generates warnings for semantic risks in Definitions/:
 
-These don't fail verification but require extra review since they can affect MainTheorem.lean semantics.
+- Custom `notation` declarations
+- `macro` definitions
+- `syntax` declarations
+- Coercion instances (`Coe`, `CoeFun`, etc.)
+
+These don't fail verification but alert reviewers that MainTheorem.lean semantics could be affected.
+
+Example warning:
+```
+WARNING: Project/Definitions/Types.lean contains custom notation (line 32) - verify MainTheorem.lean semantics
+```
+
+## Optional: SafeVerify Integration
+
+| Check | Description |
+|-------|-------------|
+| **SafeVerify** | Kernel-level re-verification via SafeVerify subprocess |
+
+SafeVerify provides more robust soundness verification by re-checking proofs through the Lean kernel at the term level. Enable with `--safeverify` flag:
+
+```bash
+lake exe tailverify --safeverify /path/to/project
+```
+
+### What SafeVerify Checks
+
+SafeVerify performs kernel-level verification including:
+- Re-verification of all declarations through the kernel
+- Axiom usage restrictions (only standard axioms allowed)
+- Detection of sorry, partial, unsafe at kernel level
+
+### Requirements
+
+SafeVerify must be installed separately. See [SafeVerify on GitHub](https://github.com/GasStationManager/SafeVerify) for installation instructions.
+
+### When to Use
+
+- **Development**: Use standard checks (`lake exe tailverify`) for fast feedback
+- **Final verification**: Add `--safeverify` for robust kernel-level verification before sharing
+
+## Design Philosophy
+
+TAIL delegates soundness checking to SafeVerify and focuses on what it does best: **trust tier enforcement**. The core question TAIL answers is:
+
+> "Are all non-Prop declarations in the human-review tier?"
+
+If yes, then a human reviewer only needs to examine MainTheorem.lean (+ Definitions/ in default mode) to understand what's being claimed. The proof machinery in ProofOfMainTheorem.lean and Proofs/ can be trusted because it contains only propositions.

@@ -94,7 +94,7 @@ structure CLIArgs where
   generateReport : Bool := false  -- Auto-generate compliance report file
   projectPrefix : Option String := none  -- Override auto-detected prefix
   mode : VerificationMode := .default  -- Verification mode
-  skipSorryCheck : Bool := false  -- Skip sorry checking (for vibe-proving)
+  runSafeVerify : Bool := false  -- Run SafeVerify kernel verification
   deriving Repr
 
 /-- Parse command line arguments -/
@@ -111,8 +111,8 @@ def parseArgs (args : List String) : IO CLIArgs := do
       result := { result with format := .text }
     else if arg == "--strict" then
       result := { result with mode := .strict }
-    else if arg == "--skip-sorry" then
-      result := { result with skipSorryCheck := true }
+    else if arg == "--safeverify" then
+      result := { result with runSafeVerify := true }
     else if arg == "--report" || arg == "-r" then
       result := { result with generateReport := true }
     else if arg == "--output" || arg == "-o" then
@@ -133,7 +133,7 @@ def parseArgs (args : List String) : IO CLIArgs := do
       IO.println ""
       IO.println "Options:"
       IO.println "  --strict      Strict mode: original TAIL Standard (no Definitions/ folder)"
-      IO.println "  --skip-sorry  Skip sorry checking (for vibe-proving workflows)"
+      IO.println "  --safeverify  Run SafeVerify kernel verification (requires SafeVerify installed)"
       IO.println "  -p, --prefix  Override project prefix (default: auto-detect from lakefile)"
       IO.println "  --json        Output in JSON format"
       IO.println "  --text        Output in text format (default)"
@@ -162,7 +162,9 @@ def main (args : List String) : IO UInt32 := do
     return (2 : UInt32)  -- Exit code 2 for config error
   | .ok resolved =>
     -- Apply CLI flags to resolved config
-    let resolved := { resolved with skipSorryCheck := cliArgs.skipSorryCheck }
+    let resolved := { resolved with
+      runSafeVerify := cliArgs.runSafeVerify
+    }
     try
       -- Run verification using olean-based checks (no environment loading needed)
       let report ← runVerification resolved

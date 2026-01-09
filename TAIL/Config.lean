@@ -60,8 +60,8 @@ structure ResolvedConfig where
   definitionsPath : Option System.FilePath
   /-- Absolute path to Proofs/ folder (optional) -/
   proofsPath : Option System.FilePath
-  /-- Skip sorry checking (for vibe-proving workflows) -/
-  skipSorryCheck : Bool := false
+  /-- Run SafeVerify kernel verification (opt-in) -/
+  runSafeVerify : Bool := false
   deriving Inhabited, Repr
 
 /-- Parse a dot-separated string into a hierarchical Name -/

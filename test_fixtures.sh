@@ -11,8 +11,37 @@ echo "=== Building TAIL ==="
 lake build
 echo ""
 
+# Check if SafeVerify is available
+SAFEVERIFY_AVAILABLE=false
+if lake exe safe_verify --help >/dev/null 2>&1; then
+    SAFEVERIFY_AVAILABLE=true
+    echo "SafeVerify detected - will run SafeVerify tests"
+else
+    echo "SafeVerify not installed - skipping SafeVerify tests"
+fi
+echo ""
+
 PASS_COUNT=0
 FAIL_COUNT=0
+
+# Setup a fixture by fetching cache and building
+setup_fixture() {
+    local fixture_path="$1"
+    local fixture_name="$2"
+
+    echo "Setting up $fixture_name..."
+
+    # Remove any broken symlinks
+    if [ -L "$fixture_path/.lake/packages" ]; then
+        rm "$fixture_path/.lake/packages"
+    fi
+
+    # Fetch cache and build
+    echo "Fetching cache and building $fixture_name..."
+    (cd "$fixture_path" && lake exe cache get && lake build) || {
+        echo "Warning: Setup failed for $fixture_name, continuing anyway..."
+    }
+}
 
 run_test() {
     local fixture_name="$1"
@@ -21,19 +50,6 @@ run_test() {
     local expect_pass="$4"
 
     echo "--- Testing: $fixture_name ---"
-
-    # Copy shared packages from main repo to avoid rebuilding mathlib
-    echo "Setting up $fixture_name..."
-    rm -rf "$fixture_path/.lake"
-    mkdir -p "$fixture_path/.lake"
-    cp -R "$SCRIPT_DIR/.lake/packages" "$fixture_path/.lake/packages"
-
-    # Build the fixture (only needs to compile the fixture's own code)
-    echo "Building $fixture_name..."
-    (cd "$fixture_path" && lake update && lake build) || {
-        echo "Warning: Build failed for $fixture_name, continuing anyway..."
-    }
-    echo ""
 
     # Run tailverify and capture exit code
     set +e
@@ -64,6 +80,16 @@ run_test() {
     echo ""
 }
 
+echo "=== Setting Up Test Fixtures ==="
+echo ""
+
+# Setup all fixtures first (they share the same mathlib version, so cache is reused)
+setup_fixture "TestFixtures/PassAll" "PassAll"
+setup_fixture "TestFixtures/PassAllStrict" "PassAllStrict"
+setup_fixture "TestFixtures/FailAll" "FailAll"
+setup_fixture "TestFixtures/FailAllStrict" "FailAllStrict"
+
+echo ""
 echo "=== Running Tests ==="
 echo ""
 
@@ -78,6 +104,19 @@ run_test "FailAll" "TestFixtures/FailAll" "" "false"
 
 # FailAllStrict - strict mode, should fail
 run_test "FailAllStrict" "TestFixtures/FailAllStrict" "--strict" "false"
+
+# SafeVerify tests (only if SafeVerify is installed)
+if [ "$SAFEVERIFY_AVAILABLE" = "true" ]; then
+    echo ""
+    echo "=== SafeVerify Tests ==="
+    echo ""
+
+    # PassAll with SafeVerify - should pass
+    run_test "PassAll+SafeVerify" "TestFixtures/PassAll" "--safeverify" "true"
+
+    # FailAll with SafeVerify - should fail
+    run_test "FailAll+SafeVerify" "TestFixtures/FailAll" "--safeverify" "false"
+fi
 
 echo "=== Summary ==="
 echo "Passed: $PASS_COUNT"

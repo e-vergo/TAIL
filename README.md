@@ -1,16 +1,18 @@
 # TAIL
 **T**emplate for **AI**-generated **L**ean
 
-A verification tool that reduces the review burden for AI-generated lean proofs.
+A verification tool that enforces trust tier separation for AI-generated Lean proofs.
 
 ## The TAIL Standard
 
-TAIL enforces a file structure that isolates declarations that don't require a proof burden, dividing project files into two trust tiers:
+TAIL enforces a two-tier trust model:
 
-- **Human Review**: `MainTheorem.lean` + `Definitions/` — defines *what* is being proven and the new objects used to prove it
-- **Machine Verified**: `ProofOfMainTheorem.lean` + `Proofs/` — Contains logical deductions based off of the defined objects
+| Tier | Files | Constraint |
+|------|-------|------------|
+| **Human Review** | MainTheorem.lean, Definitions/ | No restrictions - reviewer checks all |
+| **Machine Verified** | ProofOfMainTheorem.lean, Proofs/ | Only Prop-valued declarations allowed |
 
-A reviewer only needs to validate the human review files to confirm that the formalization is sound.
+The key principle: non-Prop declarations (structures, inductives, data-returning defs) **must** be in the human-review tier. This ensures a reviewer only needs to validate a small surface area to confirm the formalization is sound.
 
 ## Quick Start
 
@@ -41,19 +43,20 @@ ProjectName/
 ## CLI Usage
 
 ```bash
-lake exe tailverify [dir]           # Verify a project
-lake exe tailverify --strict [dir]  # Strict mode (no Definitions/)
-lake exe tailverify --json          # JSON output for CI
-lake exe tailscaffold ProjectName   # Create new project
+lake exe tailverify [dir]             # Verify a project
+lake exe tailverify --strict [dir]    # Strict mode (no Definitions/)
+lake exe tailverify --safeverify      # Enable SafeVerify kernel verification
+lake exe tailverify --json            # JSON output for CI
+lake exe tailscaffold ProjectName     # Create new project
 ```
 
 ## Documentation
 
-- [The TAIL Standard](docs/standard.md) — Philosophy, modes, trust tiers
-- [Verification Checks](docs/checks.md) — All 10 checks explained
-- [Project Structure](docs/project-structure.md) — File layouts and examples
-- [CLI Reference](docs/cli-reference.md) — Full command reference
-- [Integration Guide](docs/integration.md) — Adding TAIL to your project
+- [The TAIL Standard](docs/standard.md) - Philosophy, modes, trust tiers
+- [Verification Checks](docs/checks.md) - 3 core checks + optional SafeVerify
+- [Project Structure](docs/project-structure.md) - File layouts and examples
+- [CLI Reference](docs/cli-reference.md) - Full command reference
+- [Integration Guide](docs/integration.md) - Adding TAIL to your project
 
 ## License
 

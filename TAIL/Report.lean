@@ -114,15 +114,16 @@ def formatCheck (result : CheckResult) : String :=
 def formatChecks (checks : List CheckResult) : String :=
   let header := "\nCHECKS\n" ++ thinDivider ++ "\n"
 
-  -- Group checks by category
-  let categories := [CheckCategory.structure, CheckCategory.soundness,
-                     CheckCategory.contentRules, CheckCategory.imports]
+  -- Group checks by category (order determines display order)
+  let categories := [CheckCategory.structure, CheckCategory.trustTier,
+                     CheckCategory.imports, CheckCategory.soundness]
 
-  let formatCategory (cat : String) : String :=
-    let categoryChecks := checks.filter (·.category == cat)
+  let formatCategory (cat : CheckCategory) : String :=
+    let catStr := cat.toString
+    let categoryChecks := checks.filter (·.category == catStr)
     if categoryChecks.isEmpty then ""
     else
-      s!"  {cat}\n" ++ String.intercalate "" (categoryChecks.map formatCheck) ++ "\n"
+      s!"  {catStr}\n" ++ String.intercalate "" (categoryChecks.map formatCheck) ++ "\n"
 
   let body := String.intercalate "" (categories.map formatCategory)
   header ++ body

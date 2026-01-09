@@ -15,7 +15,7 @@ lake exe tailverify [directory] [options]
 | Option | Description |
 |--------|-------------|
 | `--strict` | Strict mode: no Definitions/ folder allowed |
-| `--skip-sorry` | Skip sorry checking (for vibe-proving workflows) |
+| `--safeverify` | Run SafeVerify kernel verification (requires SafeVerify installed) |
 | `--json` | Output in JSON format |
 | `--text` | Output in text format (default) |
 | `-r, --report` | Generate `tail_compliance_report.txt` in project root |
@@ -46,6 +46,9 @@ lake exe tailverify --strict
 
 # Generate JSON for CI
 lake exe tailverify --json
+
+# Run with SafeVerify kernel verification
+lake exe tailverify --safeverify
 
 # Save report to file
 lake exe tailverify --output report.txt
@@ -139,17 +142,8 @@ CHECKS
   Structure
     [PASS] Structure
 
-  Soundness
-    [PASS] Soundness
-    [PASS] Axioms in Source
-    [PASS] Opaques in Source
-    [PASS] Unsafe Attributes
-
-  Content Rules
-    [PASS] ProofOfMainTheorem Isolation
-    [PASS] MainTheorem Isolation
-    [PASS] Proofs Content
-    [PASS] Definitions Content
+  Trust Tier
+    [PASS] Trust Tier
 
   Import Discipline
     [PASS] Import Discipline
@@ -174,20 +168,15 @@ CHECKS
   Structure
     [PASS] Structure
 
-  Soundness
-    [FAIL] Soundness
-             - FailingProject.ProofOfMainTheorem: mainTheorem (sorry)
-    [FAIL] Axioms in Source
-             - FailingProject/Proofs/Helper.lean:41: axiom bad : False
-
-  Content Rules
-    [FAIL] ProofOfMainTheorem Isolation
-           Multiple theorems/axioms found (3)
-    [PASS] MainTheorem Isolation
+  Trust Tier
+    [FAIL] Trust Tier
+           - FailingProject.Proofs.Helper: def badDef does not return Prop
+           - FailingProject.Proofs.Helper: inductive BadStructure (not allowed)
 
   Import Discipline
     [FAIL] Import Discipline
-           MainTheorem.lean import violations
+           MainTheorem.lean import violations:
+             - FailingProject.Proofs.Helper (project import not allowed)
 
 ================================================================================
 RESULT: PROJECT FAILS TO MEET TEMPLATE EXPECTATIONS

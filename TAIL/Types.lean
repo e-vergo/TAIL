@@ -63,10 +63,21 @@ def TrustLevel.requiresHumanReview : TrustLevel → Bool
 /-! ## Check Results -/
 
 /-- Categories for grouping checks in reports -/
-def CheckCategory.structure : String := "Structure"
-def CheckCategory.soundness : String := "Soundness"
-def CheckCategory.contentRules : String := "Content Rules"
-def CheckCategory.imports : String := "Import Discipline"
+inductive CheckCategory where
+  | structure    -- Required declarations exist
+  | trustTier    -- Machine-verified tier is Prop-only
+  | imports      -- Import discipline
+  | soundness    -- SafeVerify (optional)
+  deriving Repr, BEq
+
+def CheckCategory.toString : CheckCategory → String
+  | .structure => "Structure"
+  | .trustTier => "Trust Tier"
+  | .imports => "Import Discipline"
+  | .soundness => "Soundness"
+
+instance : ToString CheckCategory where
+  toString := CheckCategory.toString
 
 /-- Result of a single verification check -/
 structure CheckResult where
@@ -92,12 +103,12 @@ instance : ToJson CheckResult where
   ]
 
 /-- Create a passing check result -/
-def CheckResult.pass (category : String) (name : String) (message : String) : CheckResult :=
-  { name, category, passed := true, message, details := [] }
+def CheckResult.pass (category : CheckCategory) (name : String) (message : String) : CheckResult :=
+  { name, category := category.toString, passed := true, message, details := [] }
 
 /-- Create a failing check result -/
-def CheckResult.fail (category : String) (name : String) (message : String) (details : List String := []) : CheckResult :=
-  { name, category, passed := false, message, details }
+def CheckResult.fail (category : CheckCategory) (name : String) (message : String) (details : List String := []) : CheckResult :=
+  { name, category := category.toString, passed := false, message, details }
 
 /-! ## Line Count Statistics -/
 
